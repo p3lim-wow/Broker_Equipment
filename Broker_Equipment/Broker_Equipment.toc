@@ -1,0 +1,11 @@
+## Interface: 30100
+## Author: p3lim
+## Version: 30100.wowi:revision
+## Title: Broker Equipment
+## Notes: LDB Equipment Manager plug-in
+
+Libs\LibStub.lua
+Libs\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1.lua
+
+Broker_Equipment.lua
