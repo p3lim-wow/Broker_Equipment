@@ -1,19 +1,22 @@
 local dummy = CreateFrame('Frame', 'Broker_EquipmentDummy', UIParent, 'UIDropDownMenuTemplate')
-local addon = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
+local broker = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
 	text = 'Equipment',
 	icon = 'Interface\\PaperDollInfoFrame\\UI-EquipmentManager-Toggle',
+	iconCoords = {0.065, 0.935, 0.065, 0.935}
 })
 
-function addon.OnClick(self, button)
+function broker.OnClick(self, button)
 	local menu = {}
 	for i = 1, GetNumEquipmentSets() do
-		local name = GetEquipmentSetInfo(i)
+		local name, texture = GetEquipmentSetInfo(i)
 		table.insert(menu, {
 			tooltipTitle = name,
 			text = name,
 			func = function()
 				EquipmentManager_EquipSet(name)
+				broker.text = name
+				broker.icon = texture
 			end
 		})
 	end
@@ -24,11 +27,16 @@ function addon.OnClick(self, button)
 	if(GameTooltip:GetOwner() == self) then GameTooltip:Hide() end
 end
 
-function addon.OnTooltipShow(self)
-	self:AddLine('Broker Equipment')
+function broker.OnTooltipShow(self)
+	self:AddLine('|cff0090ffBroker Equipment|r')
 	self:AddLine('Click here to change your set')
 end
 
--- force the equipmanager to enable
-SetCVar('equipmentManager', 1)
-GearManagerToggleButton:Show()
+dummy:RegisterEvent('PLAYER_LOGIN')
+dummy:SetScript('OnEvent', function()
+	-- force the equipmanager to enable
+	SetCVar('equipmentManager', 1)
+	GearManagerToggleButton:Show()
+
+	-- Todo: Set the name of the set that you are wearing on load
+end)
