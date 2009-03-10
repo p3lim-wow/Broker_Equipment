@@ -70,7 +70,7 @@ function frame:PLAYER_REGEN_ENABLED()
 end
 
 function frame:EQUIPMENT_SETS_CHANGED()
-	needUpdate = true
+	pendingUpdate = true
 end
 
 function frame:ADDON_LOADED(event, addon)
