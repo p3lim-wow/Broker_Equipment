@@ -1,7 +1,13 @@
-local L = {}
+﻿local L = {}
 if(GetLocale() == 'deDE') then
 	L.TOOLTIP = 'Klicke hier um das set zu wechsein'
 	L.NOSET = 'Kein set'
+elseif(GetLocale() == 'zhCN' then
+	L.TOOLTIP = '点击选择套装'
+	L.NOSET = '无套装'
+elseif(GetLocale() == 'zhTW' then
+	L.TOOLTIP = '點擊選擇套裝'
+	L.NOSET = '無套裝'
 else
 	L.TOOLTIP = 'Click here to change your set'
 	L.NOSET = 'No set'
