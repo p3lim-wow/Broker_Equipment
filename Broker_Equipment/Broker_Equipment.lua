@@ -2,6 +2,9 @@
 if(GetLocale() == 'deDE') then
 	L.TOOLTIP = 'Klicke hier um das set zu wechsein'
 	L.NOSET = 'Kein set'
+elseif(GetLocale() == 'frFR') then
+	L.TOOLTIP = 'Cliquez ici pour changer de set'
+	L.NOSET = 'Pas de set'
 elseif(GetLocale() == 'zhCN') then
 	L.TOOLTIP = '点击选择套装'
 	L.NOSET = '无套装'
@@ -13,13 +16,14 @@ else
 	L.NOSET = 'No set'
 end
 
-
 local menuList = {}
 local pendingName = nil
 local pendingUpdate = true
 
-local frame = CreateFrame('Frame', 'Broker_EquipmentDropDown', UIParent, 'UIDropDownMenuTemplate')
-local broker = LibStub:GetLibrary('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
+local addonName = 'Broker_Equipment'
+
+local addon = CreateFrame('Frame', addonName..'DropDown', UIParent, 'UIDropDownMenuTemplate')
+local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 	type = 'data source',
 	text = L.NOSET,
 	icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=],
@@ -40,6 +44,12 @@ local function equipSet(name, icon)
 	broker.icon = icon
 	EquipmentDB.text = name
 	EquipmentDB.icon = icon
+end
+
+local function initDropDown()
+	for k, v in next, menuList do
+		UIDropDownMenu_AddButton(v, level or 1)
+	end
 end	
 
 local function createDropDown()
@@ -56,39 +66,29 @@ local function createDropDown()
 		menuList[index] = info
 	end
 
-	table.sort(menuList, function(a,b) return a.index < b.index end)
-	UIDropDownMenu_Initialize(frame, initDropDown, 'MENU')
+	table.sort(menuList, function(a, b) return a.index < b.index end)
+	UIDropDownMenu_Initialize(addon, initDropDown, 'MENU')
 	pendingUpdate = nil
 end
 
-local function initDropDown()
-	for k,v in next, menuList do
-		UIDropDownMenu_AddButton(v, level or 1)
+local function onEvent(self, event, arg1)
+	if(event == 'PLAYER_REGEN_ENABLED') then
+		if(pendingName) then
+			broker.text = pendingName
+			pendingName = nil
+		end
+	elseif(event == 'EQUIPMENT_SETS_CHANGED') then
+		pendingUpdate = true
+	else
+		if(arg1 ~= addonName) then return end
+
+		Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.icon}
+		broker.text = Broker_EquipmentDB.text
+		broker.icon = Broker_EquipmentDB.icon
+
+		self:UnregisterEvent(event)
 	end
 end
-
-
-function frame:PLAYER_REGEN_ENABLED()
-	if(pendingName) then
-		broker.text = pendingName
-		combatName = nil
-	end
-end
-
-function frame:EQUIPMENT_SETS_CHANGED()
-	pendingUpdate = true
-end
-
-function frame:ADDON_LOADED(event, addon)
-	if(addon ~= 'Broker_Equipment') then return end
-
-	EquipmentDB = EquipmentDB or {text = L.NOSET, icon = broker.icon}
-	broker.text = EquipmentDB.text
-	broker.icon = EquipmentDB.icon
-
-	self:UnregisterEvent(event)
-end
-
 
 function broker:OnClick()
 	if(GameTooltip:GetOwner() == self) then
@@ -99,7 +99,7 @@ function broker:OnClick()
 		createDropDown()
 	end
 
-	ToggleDropDownMenu(1, nil, frame, self, 0, 0)
+	ToggleDropDownMenu(1, nil, addon, self, 0, 0)
 end
 
 function broker:OnTooltipShow()
@@ -108,7 +108,7 @@ function broker:OnTooltipShow()
 end
 
 
-frame:RegisterEvent('ADDON_LOADED')
-frame:RegisterEvent('PLAYER_REGEN_ENABLED')
-frame:RegisterEvent('EQUIPMENT_SETS_CHANGED')
-frame:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+addon:RegisterEvent('ADDON_LOADED')
+addon:RegisterEvent('PLAYER_REGEN_ENABLED')
+addon:RegisterEvent('EQUIPMENT_SETS_CHANGED')
+addon:SetScript('OnEvent', onEvent)
