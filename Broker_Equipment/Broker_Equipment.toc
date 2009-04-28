@@ -3,10 +3,10 @@
 ## Version: 30100.wowi:revision
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
-## SavedVariablesPerCharacter: EquipmentDB
+## SavedVariablesPerCharacter: Broker_EquipmentDB
 
-Libs\LibStub.lua
-Libs\CallbackHandler-1.0.lua
-Libs\LibDataBroker-1.1.lua
+libs\LibStub.lua
+libs\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1.lua
 
 Broker_Equipment.lua
