@@ -53,8 +53,8 @@ local function equipSet(name, icon)
 	end
 
 	broker.icon = icon
-	EquipmentDB.text = name
-	EquipmentDB.icon = icon
+	Broker_EquipmentDB.text = name
+	Broker_EquipmentDB.icon = icon
 end
 
 local function initDropDown()
