@@ -22,6 +22,9 @@ elseif(GetLocale() == 'zhCN') then
 elseif(GetLocale() == 'zhTW') then
 	L.TOOLTIP = '點擊選擇套裝'
 	L.NOSET = '無套裝'
+elseif(GetLocale() == 'koKR') then
+	L.TOOLTIP = '당신의 세트를 변경하려면 여기를 클릭하세요.'
+	L.NOSET = '세트 없음'
 else
 	L.TOOLTIP = 'Click here to change your set'
 	L.NOSET = 'No set'
@@ -41,20 +44,41 @@ local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 	iconCoords = {0.065, 0.935, 0.065, 0.935}
 })
 
-
-local function equipSet(name, icon)
-	EquipmentManager_EquipSet(name)
-
-	if(InCombatLockdown()) then
-		pendingName = name
-		broker.text = '|cffff0000'..name
-	else
-		broker.text = name
+-- borrowed from tekkub's EquipSetUpdater
+local function GetTextureIndex(tex)
+	tex = tex:lower()
+	local numicons = GetNumMacroIcons()
+	for i=INVSLOT_FIRST_EQUIPPED,INVSLOT_LAST_EQUIPPED do if GetInventoryItemTexture("player", i) then numicons = numicons + 1 end end
+	for i=1,numicons do
+		local texture, index = GetEquipmentSetIconInfo(i)
+		if texture:lower() == tex then return index end
 	end
+end
 
-	broker.icon = icon
-	Broker_EquipmentDB.text = name
-	Broker_EquipmentDB.icon = icon
+local function handleClick(name, icon)
+	if(IsShiftKeyDown() and IsAltKeyDown()) then
+		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
+		dialog.data = name
+	elseif(IsControlKeyDown() and IsAltKeyDown()) then
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
+		dialog.data = name
+		dialog.selectedIcon = GetTextureIndex(icon)
+	elseif(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player')) then
+		return
+	else
+		EquipmentManager_EquipSet(name)
+
+		if(InCombatLockdown()) then
+			pendingName = name
+			broker.text = '|cffff0000'..name
+		else
+			broker.text = name
+		end
+
+		broker.icon = icon
+		Broker_EquipmentDB.text = name
+		Broker_EquipmentDB.icon = icon
+	end
 end
 
 local function initDropDown()
@@ -72,7 +96,7 @@ local function createDropDown()
 		info.index = index
 		info.text = name
 		info.icon = icon
-		info.func = function() equipSet(name, icon) end
+		info.func = function() handleClick(name, icon) end
 
 		menuList[index] = info
 	end
@@ -102,25 +126,15 @@ local function onEvent(self, event, arg1)
 end
 
 function broker:OnClick(button)
-	if(button == 'RightButton') then
-		-- open the frame
-		ToggleCharacter('PaperDollFrame')
-
-		if(PaperDollFrame:IsShown()) then
-			
-		end
-		-- now click the damn button
-	else
-		if(GameTooltip:GetOwner() == self) then
-			GameTooltip:Hide()
-		end
-
-		if(pendingUpdate) then
-			createDropDown()
-		end
-
-		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
+	if(GameTooltip:GetOwner() == self) then
+		GameTooltip:Hide()
 	end
+
+	if(pendingUpdate) then
+		createDropDown()
+	end
+
+	ToggleDropDownMenu(1, nil, addon, self, 0, 0)
 end
 
 function broker:OnTooltipShow()
@@ -128,6 +142,19 @@ function broker:OnTooltipShow()
 	self:AddLine(L.TOOLTIP)
 end
 
+hooksecurefunc('EquipmentManager_EquipSet', function(name)
+	if(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player')) then return end
+	if(name == broker.text) then return end
+	
+	if(name) then
+		local icon = GetEquipmentSetInfoByName(name)
+		broker.text = name
+		broker.icon = icon:match('Interface') and icon or [=[Interface\Icons\]=] .. icon
+	else
+		broker.text = L.NOSET
+		broker.icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]
+	end
+end)
 
 addon:RegisterEvent('ADDON_LOADED')
 addon:RegisterEvent('PLAYER_REGEN_ENABLED')
