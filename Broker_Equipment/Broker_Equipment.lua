@@ -11,22 +11,34 @@
 
 local L = {}
 if(GetLocale() == 'deDE') then
-	L.TOOLTIP = 'Klicke hier um das set zu wechsein'
+	L.TOOLTIP1 = 'Klicke hier um das set zu wechsein'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = 'Kein set'
 elseif(GetLocale() == 'frFR') then
-	L.TOOLTIP = 'Cliquez ici pour changer de set'
+	L.TOOLTIP1 = 'Cliquez ici pour changer de set'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = 'Pas de set'
 elseif(GetLocale() == 'zhCN') then
-	L.TOOLTIP = '点击选择套装'
+	L.TOOLTIP1 = '点击选择套装'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = '无套装'
 elseif(GetLocale() == 'zhTW') then
-	L.TOOLTIP = '點擊選擇套裝'
+	L.TOOLTIP1 = '點擊選擇套裝'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = '無套裝'
 elseif(GetLocale() == 'koKR') then
-	L.TOOLTIP = '당신의 세트를 변경하려면 여기를 클릭하세요.'
+	L.TOOLTIP1 = '당신의 세트를 변경하려면 여기를 클릭하세요.'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = '세트 없음'
 else
-	L.TOOLTIP = 'Click here to change your set'
+	L.TOOLTIP1 = 'Click here to change your set'
+	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set'
+	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set'
 	L.NOSET = 'No set'
 end
 
@@ -139,7 +151,9 @@ end
 
 function broker:OnTooltipShow()
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(L.TOOLTIP)
+	self:AddLine(L.TOOLTIP1)
+	self:AddLine(L.TOOLTIP2)
+	self:AddLine(L.TOOLTIP3)
 end
 
 hooksecurefunc('EquipmentManager_EquipSet', function(name)
