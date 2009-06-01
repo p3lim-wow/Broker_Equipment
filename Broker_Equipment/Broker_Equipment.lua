@@ -10,27 +10,27 @@
 --]]
 
 local L = {}
-if(GetLocale() == 'deDE') then
+if(GetLocale() == 'deDE') then -- Katharsis
 	L.TOOLTIP1 = 'Klicke hier um das set zu wechsein'
-	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
-	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
+	L.TOOLTIP2 = 'Klicke mit Strg+Alt im men/195/188 um dein set zu aktualisieren'
+	L.TOOLTIP3 = 'Klicke mit Shift+Alt im men/195/188 um dein set zu l/195/182schen'
 	L.NOSET = 'Kein set'
-elseif(GetLocale() == 'frFR') then
+elseif(GetLocale() == 'frFR') then -- Soeters
 	L.TOOLTIP1 = 'Cliquez ici pour changer de set'
 	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
 	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
 	L.NOSET = 'Pas de set'
-elseif(GetLocale() == 'zhCN') then
+elseif(GetLocale() == 'zhCN') then -- yleaf & yaroot
 	L.TOOLTIP1 = '点击选择套装'
-	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
-	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
+	L.TOOLTIP2 = 'Ctrl+Alt 点击更新套装'
+	L.TOOLTIP3 = 'Shift+Alt 点击删除套装'
 	L.NOSET = '无套装'
-elseif(GetLocale() == 'zhTW') then
+elseif(GetLocale() == 'zhTW') then -- yleaf & yaroot
 	L.TOOLTIP1 = '點擊選擇套裝'
-	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
-	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
+	L.TOOLTIP2 = 'Ctrl+Alt 點擊更新套裝'
+	L.TOOLTIP3 = 'Shift+Alt 點擊刪除套裝'
 	L.NOSET = '無套裝'
-elseif(GetLocale() == 'koKR') then
+elseif(GetLocale() == 'koKR') then -- mrgyver
 	L.TOOLTIP1 = '당신의 세트를 변경하려면 여기를 클릭하세요.'
 	L.TOOLTIP2 = 'Ctrl+Alt click in menu to update your set (NYI)'
 	L.TOOLTIP3 = 'Shift+Alt click in menu to delete your set (NYI)'
@@ -69,27 +69,16 @@ end
 
 local function handleClick(name, icon)
 	if(IsShiftKeyDown() and IsAltKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
+		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name) -- needs more testing
 		dialog.data = name
 	elseif(IsControlKeyDown() and IsAltKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name) -- needs more testing
 		dialog.data = name
 		dialog.selectedIcon = GetTextureIndex(icon)
-	elseif(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player')) then
+	elseif(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player') or InCombatLockdown()) then
 		return
 	else
 		EquipmentManager_EquipSet(name)
-
-		if(InCombatLockdown()) then
-			pendingName = name
-			broker.text = '|cffff0000'..name
-		else
-			broker.text = name
-		end
-
-		broker.icon = icon
-		Broker_EquipmentDB.text = name
-		Broker_EquipmentDB.icon = icon
 	end
 end
 
@@ -119,12 +108,7 @@ local function createDropDown()
 end
 
 local function onEvent(self, event, arg1)
-	if(event == 'PLAYER_REGEN_ENABLED') then
-		if(pendingName) then
-			broker.text = pendingName
-			pendingName = nil
-		end
-	elseif(event == 'EQUIPMENT_SETS_CHANGED') then
+	if(event == 'EQUIPMENT_SETS_CHANGED') then
 		pendingUpdate = true
 	else
 		if(arg1 ~= addonName) then return end
@@ -157,20 +141,16 @@ function broker:OnTooltipShow()
 end
 
 hooksecurefunc('EquipmentManager_EquipSet', function(name)
-	if(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player')) then return end
-	if(name == broker.text) then return end
-	
-	if(name) then
+	if(name and name ~= broker.text) then
 		local icon = GetEquipmentSetInfoByName(name)
 		broker.text = name
 		broker.icon = icon:match('Interface') and icon or [=[Interface\Icons\]=] .. icon
-	else
-		broker.text = L.NOSET
-		broker.icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]
+
+		Broker_EquipmentDB.text = name
+		Broker_EquipmentDB.icon = icon
 	end
 end)
 
 addon:RegisterEvent('ADDON_LOADED')
-addon:RegisterEvent('PLAYER_REGEN_ENABLED')
 addon:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 addon:SetScript('OnEvent', onEvent)
