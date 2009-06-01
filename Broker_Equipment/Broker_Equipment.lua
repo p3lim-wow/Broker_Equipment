@@ -58,6 +58,7 @@ local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 
 -- borrowed from tekkub's EquipSetUpdater
 local function GetTextureIndex(tex)
+	RefreshEquipmentSetIconInfo()
 	tex = tex:lower()
 	local numicons = GetNumMacroIcons()
 	for i=INVSLOT_FIRST_EQUIPPED,INVSLOT_LAST_EQUIPPED do if GetInventoryItemTexture("player", i) then numicons = numicons + 1 end end
