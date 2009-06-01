@@ -70,12 +70,12 @@ end
 
 local function handleClick(name, icon)
 	if(IsShiftKeyDown() and IsAltKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name) -- needs more testing
+		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
 	elseif(IsControlKeyDown() and IsAltKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name) -- needs more testing
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
 		dialog.data = name
-		dialog.selectedIcon = GetTextureIndex(icon)
+		dialog.selectedIcon = GetTextureIndex(icon) -- blizzard sucks
 	elseif(EquipmentSetContainsLockedItems(name) or UnitOnTaxi('player') or UnitCastingInfo('player') or InCombatLockdown()) then
 		return
 	else
@@ -144,11 +144,13 @@ end
 hooksecurefunc('EquipmentManager_EquipSet', function(name)
 	if(name and name ~= broker.text) then
 		local icon = GetEquipmentSetInfoByName(name)
+		local propericon = icon:match('Interface') and icon or [=[Interface\Icons\]=] .. icon -- fixing blizzard's bug
+
 		broker.text = name
-		broker.icon = icon:match('Interface') and icon or [=[Interface\Icons\]=] .. icon
+		broker.icon = propericon
 
 		Broker_EquipmentDB.text = name
-		Broker_EquipmentDB.icon = icon
+		Broker_EquipmentDB.icon = propericon
 	end
 end)
 
