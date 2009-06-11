@@ -12,29 +12,29 @@
 local L = {}
 if(GetLocale() == 'deDE') then -- Katharsis
 	L.NOSET = 'Kein set'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
-	L.HINT = {' ', '|cff00ff00Shift-click to update set|r', '|cff00ff00Ctrl-click to delete set|r'}
+	L.TOOLTIP1 = 'Left-click to change your set' -- todo
+	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
+	L.HINT = {' ', '|cff00ff00Shift-click to update set|r', '|cff00ff00Ctrl-click to delete set|r'} -- todo
 elseif(GetLocale() == 'frFR') then -- Soeters
 	L.NOSET = 'Pas de set'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
+	L.TOOLTIP1 = 'Left-click to change your set' -- todo
+	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
 	L.HINT = {' ', '|cff00ff00Maj-clic pour mettre à jour le set|r', '|cff00ff00Ctrl-clic pour supprimer le set|r'}
 elseif(GetLocale() == 'zhCN') then -- yleaf
 	L.NOSET = '无套装'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
+	L.TOOLTIP1 = 'Left-click to change your set' -- todo
+	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
 	L.HINT = {' ', '|cff00ff00Shift点击覆盖套装|r', '|cff00ff00Ctrl点击删除套装|r'}
 elseif(GetLocale() == 'zhTW') then -- yleaf
 	L.NOSET = '無套裝'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
+	L.TOOLTIP1 = 'Left-click to change your set' -- todo
+	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
 	L.HINT = {' ', '|cff00ff00Shift點擊覆蓋套裝|r', '|cff00ff00Ctrl點擊刪除套裝|r'}
 elseif(GetLocale() == 'koKR') then -- mrgyver
 	L.NOSET = '세트 없음'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
-	L.HINT = {' ', '|cff00ff00Shift-click to update set|r', '|cff00ff00Ctrl-click to delete set|r'}
+	L.TOOLTIP1 = '좌-클릭 세트 변경'
+	L.TOOLTIP2 = '우-클릭 장비 관리창 열기'
+	L.HINT = {' ', '|cff00ff00Shift-클릭 하면 세트 업데이트|r', '|cff00ff00Ctrl-클릭 하면 세트 삭제|r'}
 else
 	L.NOSET = 'No set'
 	L.TOOLTIP1 = 'Left-click to change your set'
@@ -43,19 +43,14 @@ else
 end
 
 
-local BEQ = CreateFrame('Frame', 'Broker_EquipmentMenu', UIParent, 'UIDropDownMenuTemplate')
-BEQ:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
-
-local failIcon = [=[Interface\Icons\ability_seal]=]
-local defaultIcon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]
-
 local menu = {}
 local pendingUpdate = true
 
+local addon = CreateFrame('Frame', 'Broker_EquipmentMenu', UIParent, 'UIDropDownMenuTemplate')
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
 	text = L.NOSET,
-	icon = defaultIcon,
+	icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=],
 	iconCoords = {0.065, 0.935, 0.065, 0.935}
 })
 
@@ -81,10 +76,15 @@ local function handleClick(name, icon)
 		dialog.data = name
 	elseif(not InCombatLockdown()) then
 		EquipmentManager_EquipSet(name)
-
-		Broker_EquipmentDB.text = name
-		Broker_EquipmentDB.icon = icon
 	end
+end
+
+local function updateInfo(name, icon)
+	broker.text = name
+	broker.icon = icon
+
+	Broker_EquipmentDB.text = name
+	Broker_EquipmentDB.icon = icon
 end
 
 local function updateMenu()
@@ -125,7 +125,7 @@ function broker:OnClick(button)
 		end
 	else
 		if(pendingUpdate) then updateMenu() end
-		EasyMenu(menu, BEQ, self, 0, 0, 'MENU')
+		EasyMenu(menu, addon, self, 0, 0, 'MENU')
 
 		if(GameTooltip:GetOwner() == self) then GameTooltip:Hide() end
 	end
@@ -137,40 +137,33 @@ function broker:OnTooltipShow()
 	self:AddLine(L.TOOLTIP2)
 end
 
-function BEQ:ADDON_LOADED(event, addon)
+function addon:ADDON_LOADED(event, addon)
 	if(addon ~= 'Broker_Equipment') then return end
 
-	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.defaultIcon}
+	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.icon}
 	broker.text = Broker_EquipmentDB.text
 	broker.icon = Broker_EquipmentDB.icon
 
+	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
+	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
 end
 
-function BEQ:EQUIPMENT_SETS_CHANGED()
+function addon:EQUIPMENT_SETS_CHANGED()
 	pendingUpdate = true
 end
 
-function BEQ:VARIABLES_LOADED()
+function addon:VARIABLES_LOADED()
 	SetCVar('equipmentManager', 1)
 	GearManagerToggleButton:Show()
 end
 
-hooksecurefunc('EquipmentManager_EquipSet', function(name)
-	if(name) then
-		local icon = GetEquipmentSetInfoByName(name)
-		-- Blizzard has some odd bug not always returning the whole icon location string
-		-- This is a temporary fix around it
-		icon = icon:sub(1, 9) ~= 'Interface' and [=[Interface\Icons\]=] .. icon or icon
-
-		broker.text = name
-		broker.icon = icon or failIcon
-	else
-		broker.text = L.NOSET
-		broker.icon = defaultIcon
+hooksecurefunc('EquipmentManager_EquipSet', function(funcName)
+	for index = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(index)
+		return name == funcName and updateInfo(name, icon)
 	end
 end)
 
-BEQ:RegisterEvent('ADDON_LOADED')
-BEQ:RegisterEvent('EQUIPMENT_SETS_CHANGED')
-BEQ:RegisterEvent('VARIABLES_LOADED')
+addon:RegisterEvent('ADDON_LOADED')
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
