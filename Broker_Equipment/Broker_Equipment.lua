@@ -158,10 +158,14 @@ function addon:VARIABLES_LOADED()
 	GearManagerToggleButton:Show()
 end
 
+
 hooksecurefunc('EquipmentManager_EquipSet', function(funcName)
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
-		return name == funcName and updateInfo(name, icon)
+		if(name == funcName) then
+			updateInfo(name, icon)
+			break
+		end
 	end
 end)
 
