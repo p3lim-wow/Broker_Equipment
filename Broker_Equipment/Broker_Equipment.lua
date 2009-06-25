@@ -10,25 +10,25 @@
 --]]
 
 local L = {}
-if(GetLocale() == 'deDE') then -- Katharsis
+if(GetLocale() == 'deDE') then -- Katharsis / copystring
 	L.NOSET = 'Kein set'
-	L.TOOLTIP1 = 'Left-click to change your set' -- todo
-	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
-	L.HINT = {' ', '|cff00ff00Shift-click to update set|r', '|cff00ff00Ctrl-click to delete set|r'} -- todo
-elseif(GetLocale() == 'frFR') then -- Soeters
+	L.TOOLTIP1 = 'Klicke links um dein set zu ändern'
+	L.TOOLTIP2 = 'Klicke rechts um den GearManager zu öffnen'
+	L.HINT = {' ', '|cff00ff00Shift-klicke um den set zu aktualisieren|r', '|cff00ff00Strg-klicke um den set zu löschen|r'}
+elseif(GetLocale() == 'frFR') then -- Soeters / Gnaf
 	L.NOSET = 'Pas de set'
-	L.TOOLTIP1 = 'Left-click to change your set' -- todo
-	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
+	L.TOOLTIP1 = 'Clic gauche pour changer d\'équipement' 
+	L.TOOLTIP2 = 'Clic droit pour ouvrir le gestionnaire d\'équipement'
 	L.HINT = {' ', '|cff00ff00Maj-clic pour mettre à jour le set|r', '|cff00ff00Ctrl-clic pour supprimer le set|r'}
 elseif(GetLocale() == 'zhCN') then -- yleaf
 	L.NOSET = '无套装'
-	L.TOOLTIP1 = 'Left-click to change your set' -- todo
-	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
+	L.TOOLTIP1 = '左键点击切换套装'
+	L.TOOLTIP2 = '右键打开套装管理器'
 	L.HINT = {' ', '|cff00ff00Shift点击覆盖套装|r', '|cff00ff00Ctrl点击删除套装|r'}
 elseif(GetLocale() == 'zhTW') then -- yleaf
 	L.NOSET = '無套裝'
-	L.TOOLTIP1 = 'Left-click to change your set' -- todo
-	L.TOOLTIP2 = 'Right-click to open GearManager' -- todo
+	L.TOOLTIP1 = '左鍵點擊切換套裝'
+	L.TOOLTIP2 = '右鍵點擊打開套裝管理器'
 	L.HINT = {' ', '|cff00ff00Shift點擊覆蓋套裝|r', '|cff00ff00Ctrl點擊刪除套裝|r'}
 elseif(GetLocale() == 'koKR') then -- mrgyver
 	L.NOSET = '세트 없음'
@@ -45,6 +45,7 @@ end
 
 local menu = {}
 local pendingUpdate = true
+local pendingName = nil
 
 local addon = CreateFrame('Frame', 'Broker_EquipmentMenu', UIParent, 'UIDropDownMenuTemplate')
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
@@ -74,13 +75,17 @@ local function handleClick(name, icon)
 	elseif(IsControlKeyDown()) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
-	elseif(not InCombatLockdown()) then
+	elseif(InCombatLockdown()) then
+		pendingName = name
+		addon:RegisterEvent('PLAYER_REGEN_ENABLED')
+		EquipmentManager_EquipSet(name)
+	else
 		EquipmentManager_EquipSet(name)
 	end
 end
 
 local function updateInfo(name, icon)
-	broker.text = name
+	broker.text = InCombatLockdown() and '|cffff0000'..name or name
 	broker.icon = icon
 
 	Broker_EquipmentDB.text = name
@@ -97,6 +102,7 @@ local function updateMenu()
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
 		local temp = {
+			notCheckable = true,
 			text = name,
 			icon = icon,
 			func = function() handleClick(name, icon) end
@@ -135,6 +141,12 @@ function broker:OnTooltipShow()
 	self:AddLine('|cff0090ffBroker Equipment|r')
 	self:AddLine(L.TOOLTIP1)
 	self:AddLine(L.TOOLTIP2)
+end
+
+function addon:PLAYER_REGEN_ENABLED(event)
+	EquipmentManager_EquipSet(pendingName)
+	pendingName = nil
+	self:UnregisterEvent(event)
 end
 
 function addon:ADDON_LOADED(event, addon)
