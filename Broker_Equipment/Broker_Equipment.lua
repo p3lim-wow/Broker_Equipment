@@ -1,45 +1,39 @@
 ﻿--[[
 
- Copyright (c) 2009, Adrian L Lange
- All rights reserved.
+	Copyright (c) 2009 Adrian L Lange <adrianlund@gmail.com>
+	All rights reserved.
 
- You're allowed to use this addon, free of monetary charge,
- but you are not allowed to modify, alter, or redistribute
- this addon without express, written permission of the author.
+	You're allowed to use this addon, free of monetary charge,
+	but you are not allowed to modify, alter, or redistribute
+	this addon without express, written permission of the author.
 
 --]]
 
 local L = {}
 if(GetLocale() == 'deDE') then -- Katharsis / copystring
 	L.NOSET = 'Kein set'
-	L.TOOLTIP1 = 'Klicke links um dein set zu ändern'
-	L.TOOLTIP2 = 'Klicke rechts um den GearManager zu öffnen'
-	L.HINT = {' ', '|cff00ff00Shift-klicke um den set zu aktualisieren|r', '|cff00ff00Strg-klicke um den set zu löschen|r'}
+	L.TOOLTIP = 'Klicke links um dein set zu ändern\nKlicke rechts um den GearManager zu öffnen'
+	L.HINTS = {' ', '|cff00ff00Shift-klicke um den set zu aktualisieren\nStrg-klicke um den set zu löschen|r'}
 elseif(GetLocale() == 'frFR') then -- Soeters / Gnaf
 	L.NOSET = 'Pas de set'
-	L.TOOLTIP1 = 'Clic gauche pour changer d\'équipement' 
-	L.TOOLTIP2 = 'Clic droit pour ouvrir le gestionnaire d\'équipement'
-	L.HINT = {' ', '|cff00ff00Maj-clic pour mettre à jour le set|r', '|cff00ff00Ctrl-clic pour supprimer le set|r'}
+	L.TOOLTIP = 'Clic gauche pour changer d\'équipement\nClic droit pour ouvrir le gestionnaire d\'équipement'
+	L.HINTS = {' ', '|cff00ff00Maj-clic pour mettre à jour le set\nCtrl-clic pour supprimer le set|r'}
 elseif(GetLocale() == 'zhCN') then -- yleaf
 	L.NOSET = '无套装'
-	L.TOOLTIP1 = '左键点击切换套装'
-	L.TOOLTIP2 = '右键打开套装管理器'
-	L.HINT = {' ', '|cff00ff00Shift点击覆盖套装|r', '|cff00ff00Ctrl点击删除套装|r'}
+	L.TOOLTIP = '左键点击切换套装\n右键打开套装管理器'
+	L.HINTS = {' ', '|cff00ff00Shift点击覆盖套装\nCtrl点击删除套装|r'}
 elseif(GetLocale() == 'zhTW') then -- yleaf
 	L.NOSET = '無套裝'
-	L.TOOLTIP1 = '左鍵點擊切換套裝'
-	L.TOOLTIP2 = '右鍵點擊打開套裝管理器'
-	L.HINT = {' ', '|cff00ff00Shift點擊覆蓋套裝|r', '|cff00ff00Ctrl點擊刪除套裝|r'}
+	L.TOOLTIP = '左鍵點擊切換套裝\n右鍵點擊打開套裝管理器'
+	L.HINTS = {' ', '|cff00ff00Shift點擊覆蓋套裝\nCtrl點擊刪除套裝|r'}
 elseif(GetLocale() == 'koKR') then -- mrgyver
 	L.NOSET = '세트 없음'
-	L.TOOLTIP1 = '좌-클릭 세트 변경'
-	L.TOOLTIP2 = '우-클릭 장비 관리창 열기'
-	L.HINT = {' ', '|cff00ff00Shift-클릭 하면 세트 업데이트|r', '|cff00ff00Ctrl-클릭 하면 세트 삭제|r'}
+	L.TOOLTIP = '좌-클릭 세트 변경\n우-클릭 장비 관리창 열기'
+	L.HINTS = {' ', '|cff00ff00Shift-클릭 하면 세트 업데이트\nCtrl-클릭 하면 세트 삭제|r'}
 else
 	L.NOSET = 'No set'
-	L.TOOLTIP1 = 'Left-click to change your set'
-	L.TOOLTIP2 = 'Right-click to open GearManager'
-	L.HINT = {' ', '|cff00ff00Shift-click to update set|r', '|cff00ff00Ctrl-click to delete set|r'}
+	L.TOOLTIP = 'Left-click to change your set\nRight-click to open GearManager'
+	L.HINTS = {' ', '|cff00ff00Shift-click to update set\nCtrl-click to delete set|r'}
 end
 
 
@@ -96,7 +90,7 @@ local function updateMenu()
 	pendingUpdate = nil
 	menu = wipe(menu)
 
-	local title = {text = 'Broker Equipment\n ', isTitle = true}
+	local title = {text = '|cff0090ffBroker Equipment|r\n', isTitle = true}
 	table.insert(menu, title)
 
 	for index = 1, GetNumEquipmentSets() do
@@ -110,8 +104,12 @@ local function updateMenu()
 		table.insert(menu, temp)
 	end
 
-	for index = 1, 3 do
-		local temp = {text = L.HINT[index], disabled = true}
+	for k, v in next, L.HINTS do
+		local temp = {
+			text = v,
+			notCheckable = true,
+			disabled = true
+		}
 		table.insert(menu, temp)
 	end
 end
@@ -139,8 +137,7 @@ end
 
 function broker:OnTooltipShow()
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(L.TOOLTIP1)
-	self:AddLine(L.TOOLTIP2)
+	self:AddLine(L.TOOLTIP)
 end
 
 function addon:PLAYER_REGEN_ENABLED(event)
@@ -170,7 +167,7 @@ function addon:VARIABLES_LOADED()
 	GearManagerToggleButton:Show()
 end
 
-
+-- This is just a temporary system to get the icon, I will try to avoid table indexing as much as possible in the future
 hooksecurefunc('EquipmentManager_EquipSet', function(funcName)
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
