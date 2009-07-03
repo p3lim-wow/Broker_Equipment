@@ -61,21 +61,40 @@ local function GetTextureIndex(tex)
 	end
 end
 
+local function matchEquipped(name)
+	for k, v in next, GetEquipmentSetItemIDs(name) do
+		local link = GetInventoryItemLink('player', k)
+		if(link) then
+			local id = tonumber(string.match(link, 'item:(%d+)'))
+			if(id ~= v) then
+				return
+			end
+		else
+			if(v ~= 0) then
+				return
+			end
+		end
+	end
+
+	return true
+end
+
 local function handleClick(name, icon)
 	if(IsShiftKeyDown()) then
 		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
-		dialog.data = name
 		dialog.selectedIcon = GetTextureIndex(icon) -- Blizzard sucks
+		dialog.data = name
+		return
 	elseif(IsControlKeyDown()) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
+		return
 	elseif(InCombatLockdown()) then
 		pendingName = name
 		addon:RegisterEvent('PLAYER_REGEN_ENABLED')
-		EquipmentManager_EquipSet(name)
-	else
-		EquipmentManager_EquipSet(name)
 	end
+
+	EquipmentManager_EquipSet(name)
 end
 
 local function updateInfo(name, icon)
@@ -90,12 +109,12 @@ local function updateMenu()
 	pendingUpdate = nil
 	menu = wipe(menu)
 
-	local title = {text = '|cff0090ffBroker Equipment|r\n', isTitle = true}
-	table.insert(menu, title)
+	local temp = {text = '|cff0090ffBroker Equipment|r\n', isTitle = true}
+	table.insert(menu, temp)
 
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
-		local temp = {
+		temp = {
 			notCheckable = true,
 			text = name,
 			icon = icon,
@@ -104,9 +123,9 @@ local function updateMenu()
 		table.insert(menu, temp)
 	end
 
-	for k, v in next, L.HINTS do
-		local temp = {
-			text = v,
+	for index = 1, 2 do
+		temp = {
+			text = L.HINTS[index],
 			notCheckable = true,
 			disabled = true
 		}
@@ -154,6 +173,8 @@ function addon:ADDON_LOADED(event, addon)
 	broker.icon = Broker_EquipmentDB.icon
 
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
+--	self:RegisterEvent('EQUIPMENT_SWAP_FINISHED') -- 3.2
+	self:RegisterEvent('UNIT_INVENTORY_CHANGED') -- experimental
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
 end
@@ -161,22 +182,38 @@ end
 function addon:EQUIPMENT_SETS_CHANGED()
 	pendingUpdate = true
 end
+--[[
+-- new event in 3.2, needs more testing vs UIC
+function addon:EQUIPMENT_SWAP_FINISHED(event, completed, setName)
+	if(completed) then
+		for index = 1, GetNumEquipmentSets() do
+			local name, icon = GetEquipmentSetInfo(index)
+			if(name == setName) then
+				updateInfo(name, icon)
+				break
+			end
+		end
+	end
+end
+--]]
+function addon:UNIT_INVENTORY_CHANGED(event, unit)
+	if(unit ~= 'player') then return end
+
+	for index = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(index)
+		if(matchEquipped(name)) then
+			updateInfo(name, icon)
+			break
+		else
+			updateInfo(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
+		end
+	end
+end
 
 function addon:VARIABLES_LOADED()
 	SetCVar('equipmentManager', 1)
 	GearManagerToggleButton:Show()
 end
-
--- This is just a temporary system to get the icon, I will try to avoid table indexing as much as possible in the future
-hooksecurefunc('EquipmentManager_EquipSet', function(funcName)
-	for index = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(index)
-		if(name == funcName) then
-			updateInfo(name, icon)
-			break
-		end
-	end
-end)
 
 addon:RegisterEvent('ADDON_LOADED')
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
