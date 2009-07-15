@@ -81,20 +81,20 @@ end
 
 local function handleClick(name, icon)
 	if(IsShiftKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
-		dialog.selectedIcon = GetTextureIndex(icon) -- Blizzard sucks
-		dialog.data = name
-		return
+		local dialog = StaticPopup_Show('CUSTOM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
+		dialog.name = name
+		dialog.icon = icon
 	elseif(IsControlKeyDown()) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
-		return
-	elseif(InCombatLockdown()) then
-		pendingName = name
-		addon:RegisterEvent('PLAYER_REGEN_ENABLED')
-	end
+	else
+		EquipmentManager_EquipSet(name)
 
-	EquipmentManager_EquipSet(name)
+		if(InCombatLockdown()) then
+			pendingName = name
+			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
+		end
+	end
 end
 
 local function updateInfo(name, icon)
@@ -133,6 +133,19 @@ local function updateMenu()
 	end
 end
 
+-- Fuck blizzard!
+StaticPopupDialogs.CUSTOM_OVERWRITE_EQUIPMENT_SET = {
+	text = CONFIRM_OVERWRITE_EQUIPMENT_SET,
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function(self) SaveEquipmentSet(self.name, GetTextureIndex(self.icon)); GearManagerDialogPopup:Hide() updateInfo(self.name, self.icon) end,
+	OnCancel = function() end,
+	OnHide = function(self) self.name, self.icon = nil, nil end,
+	hideOnEscape = 1,
+	timeout = 0,
+	exclusive = 1,
+}
+
 function broker:OnClick(button)
 	if(button == 'RightButton') then
 		if(GearManagerDialog:IsVisible()) then
@@ -146,7 +159,7 @@ function broker:OnClick(button)
 			end
 			GearManagerDialog:Show()
 		end
-	else
+	elseif(GetNumEquipmentSets() > 0) then
 		if(pendingUpdate) then updateMenu() end
 		EasyMenu(menu, addon, self, 0, 0, 'MENU')
 
@@ -173,8 +186,7 @@ function addon:ADDON_LOADED(event, addon)
 	broker.icon = Broker_EquipmentDB.icon
 
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
---	self:RegisterEvent('EQUIPMENT_SWAP_FINISHED') -- 3.2
-	self:RegisterEvent('UNIT_INVENTORY_CHANGED') -- experimental
+	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
 end
@@ -182,20 +194,7 @@ end
 function addon:EQUIPMENT_SETS_CHANGED()
 	pendingUpdate = true
 end
---[[
--- new event in 3.2, needs more testing vs UIC
-function addon:EQUIPMENT_SWAP_FINISHED(event, completed, setName)
-	if(completed) then
-		for index = 1, GetNumEquipmentSets() do
-			local name, icon = GetEquipmentSetInfo(index)
-			if(name == setName) then
-				updateInfo(name, icon)
-				break
-			end
-		end
-	end
-end
---]]
+
 function addon:UNIT_INVENTORY_CHANGED(event, unit)
 	if(unit ~= 'player') then return end
 
@@ -210,9 +209,11 @@ function addon:UNIT_INVENTORY_CHANGED(event, unit)
 	end
 end
 
-function addon:VARIABLES_LOADED()
+function addon:VARIABLES_LOADED(event)
 	SetCVar('equipmentManager', 1)
 	GearManagerToggleButton:Show()
+
+	self:UnregisterEvent(event)
 end
 
 addon:RegisterEvent('ADDON_LOADED')
