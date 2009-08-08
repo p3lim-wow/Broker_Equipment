@@ -1,6 +1,6 @@
 ## Interface: 30200
 ## Author: p3lim
-## Version: 30200.1-Beta
+## Version: Alpha
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
 ## SavedVariablesPerCharacter: Broker_EquipmentDB
