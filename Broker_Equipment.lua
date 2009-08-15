@@ -62,16 +62,18 @@ local function GetTextureIndex(tex)
 end
 
 local function matchEquipped(name)
-	for k, v in next, GetEquipmentSetItemIDs(name) do
-		local link = GetInventoryItemLink('player', k)
-		if(link) then
-			local id = tonumber(string.match(link, 'item:(%d+)'))
-			if(id ~= v) then
-				return
-			end
-		else
-			if(v ~= 0) then
-				return
+	for slot, id in next, GetEquipmentSetItemIDs(name) do
+		if(id ~= 1) then
+			local link = GetInventoryItemLink('player', slot)
+			if(link) then
+				local current = tonumber(string.match(link, 'item:(%d+)'))
+				if(current ~= id) then
+					return
+				end
+			else
+				if(id ~= 0) then
+					return
+				end
 			end
 		end
 	end
