@@ -62,19 +62,17 @@ local function GetTextureIndex(tex)
 end
 
 local function matchEquipped(name)
-	for slot, id in next, GetEquipmentSetItemIDs(name) do
-		if(id ~= 1) then
-			local link = GetInventoryItemLink('player', slot)
-			if(link) then
-				local current = tonumber(string.match(link, 'item:(%d+)'))
-				if(current ~= id) then
-					return
-				end
-			else
-				if(id ~= 0) then
-					return
-				end
-			end
+	local located
+	for slot, location in next, GetEquipmentSetLocations(name) do
+		if(location == 0) then
+			located = not GetInventoryItemLink('player', slot)
+		elseif(location ~= 1) then
+			local player, bank, bags = EquipmentManager_UnpackLocation(location)
+			located = player and not bank and not bags
+		end
+
+		if(not located) then
+			return
 		end
 	end
 
