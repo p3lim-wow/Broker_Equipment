@@ -37,11 +37,9 @@ else
 end
 
 
-local menu = {}
-local pendingUpdate = true
-local pendingName = nil
+local pending
 
-local addon = CreateFrame('Frame', 'Broker_EquipmentMenu', UIParent, 'UIDropDownMenuTemplate')
+local addon = CreateFrame('Frame', 'Broker_EquipmentMenu')
 addon:RegisterEvent('ADDON_LOADED')
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 
@@ -82,7 +80,7 @@ local function equipped(name)
 	return true
 end
 
-local function menuClick(name, icon)
+local function menuClick(button, name, icon)
 	if(IsShiftKeyDown()) then
 		local dialog = StaticPopup_Show('CUSTOM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
 		dialog.name = name
@@ -94,7 +92,7 @@ local function menuClick(name, icon)
 		EquipmentManager_EquipSet(name)
 
 		if(InCombatLockdown()) then
-			pendingName = name
+			pending = name
 			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
 		end
 	end
@@ -106,39 +104,6 @@ local function updateInfo(name, icon)
 
 	Broker_EquipmentDB.text = name
 	Broker_EquipmentDB.icon = icon
-end
-
-local function updateMenu()
-	pendingUpdate = nil
-	menu = wipe(menu)
-
-	local temp = {text = '|cff0090ffBroker Equipment|r\n', isTitle = true}
-	table.insert(menu, temp)
-
-	for index = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(index)
-		temp = {
-			notCheckable = 1,
-			text = name,
-			icon = icon,
-			func = function() menuClick(name, icon) end
-		}
-		table.insert(menu, temp)
-	end
-
-	temp = {
-		text = ' ',
-		notCheckable = 1,
-		disabled = 1
-	}
-	table.insert(menu, temp)
-
-	temp = {
-		text = L.HINTS,
-		notCheckable = 1,
-		disabled = 1
-	}
-	table.insert(menu, temp)
 end
 
 -- Fuck blizzard!
@@ -168,10 +133,11 @@ function broker:OnClick(button)
 			GearManagerDialog:Show()
 		end
 	elseif(GetNumEquipmentSets() > 0) then
-		if(pendingUpdate) then updateMenu() end
-		EasyMenu(menu, addon, self, 0, 0, 'MENU')
+		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
+	end
 
-		if(GameTooltip:GetOwner() == self) then GameTooltip:Hide() end
+	if(GameTooltip:GetOwner() == self) then
+		GameTooltip:Hide()
 	end
 end
 
@@ -180,13 +146,43 @@ function broker:OnTooltipShow()
 	self:AddLine(L.TOOLTIP)
 end
 
+function addon:initialize(level)
+	local info = wipe(self.info)
+	info.isTitle = 1
+	info.notCheckable = 1
+	info.text = '|cff0090ffBroker Equipment|r\n '
+	UIDropDownMenu_AddButton(info, level)
+
+	wipe(info)
+	for index = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(index)
+		info.text = string.format('|T%s:20|t %s', icon, name)
+		info.arg1 = name
+		info.arg2 = icon
+		info.func = menuClick
+		info.checked = equipped(name) or pending and pending == name
+		UIDropDownMenu_AddButton(info, level)
+	end
+
+	wipe(info)
+	info.text = ' '
+	info.disabled = 1
+	info.notCheckable = 1
+	UIDropDownMenu_AddButton(info, level)
+
+	info.text = L.HINTS
+	UIDropDownMenu_AddButton(info, level)
+end
+
 function addon:ADDON_LOADED(event, addon)
 	if(addon ~= 'Broker_Equipment') then return end
 
 	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.icon}
 
+	self.info = {}
+	self.displayMode = 'MENU'
+
 	self:UNIT_INVENTORY_CHANGED()
-	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
@@ -200,13 +196,9 @@ function addon:VARIABLES_LOADED(event)
 end
 
 function addon:PLAYER_REGEN_ENABLED(event)
-	EquipmentManager_EquipSet(pendingName)
-	pendingName = nil
+	EquipmentManager_EquipSet(pending)
+	pending = nil
 	self:UnregisterEvent(event)
-end
-
-function addon:EQUIPMENT_SETS_CHANGED()
-	pendingUpdate = true
 end
 
 function addon:UNIT_INVENTORY_CHANGED(event, unit)
