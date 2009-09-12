@@ -42,6 +42,9 @@ local pendingUpdate = true
 local pendingName = nil
 
 local addon = CreateFrame('Frame', 'Broker_EquipmentMenu', UIParent, 'UIDropDownMenuTemplate')
+addon:RegisterEvent('ADDON_LOADED')
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
 	text = L.NOSET,
@@ -61,7 +64,7 @@ local function GetTextureIndex(tex)
 	end
 end
 
-local function matchEquipped(name)
+local function equipped(name)
 	local located
 	for slot, location in next, GetEquipmentSetLocations(name) do
 		if(location == 0) then
@@ -79,7 +82,7 @@ local function matchEquipped(name)
 	return true
 end
 
-local function handleClick(name, icon)
+local function menuClick(name, icon)
 	if(IsShiftKeyDown()) then
 		local dialog = StaticPopup_Show('CUSTOM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
 		dialog.name = name
@@ -118,7 +121,7 @@ local function updateMenu()
 			notCheckable = true,
 			text = name,
 			icon = icon,
-			func = function() handleClick(name, icon) end
+			func = function() menuClick(name, icon) end
 		}
 		table.insert(menu, temp)
 	end
@@ -172,41 +175,16 @@ function broker:OnTooltipShow()
 	self:AddLine(L.TOOLTIP)
 end
 
-function addon:PLAYER_REGEN_ENABLED(event)
-	EquipmentManager_EquipSet(pendingName)
-	pendingName = nil
-	self:UnregisterEvent(event)
-end
-
 function addon:ADDON_LOADED(event, addon)
 	if(addon ~= 'Broker_Equipment') then return end
 
 	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.icon}
-	broker.text = Broker_EquipmentDB.text
-	broker.icon = Broker_EquipmentDB.icon
 
+	self:UNIT_INVENTORY_CHANGED()
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
-end
-
-function addon:EQUIPMENT_SETS_CHANGED()
-	pendingUpdate = true
-end
-
-function addon:UNIT_INVENTORY_CHANGED(event, unit)
-	if(unit ~= 'player') then return end
-
-	for index = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(index)
-		if(matchEquipped(name)) then
-			updateInfo(name, icon)
-			break
-		else
-			updateInfo(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
-		end
-	end
 end
 
 function addon:VARIABLES_LOADED(event)
@@ -216,5 +194,26 @@ function addon:VARIABLES_LOADED(event)
 	self:UnregisterEvent(event)
 end
 
-addon:RegisterEvent('ADDON_LOADED')
-addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+function addon:PLAYER_REGEN_ENABLED(event)
+	EquipmentManager_EquipSet(pendingName)
+	pendingName = nil
+	self:UnregisterEvent(event)
+end
+
+function addon:EQUIPMENT_SETS_CHANGED()
+	pendingUpdate = true
+end
+
+function addon:UNIT_INVENTORY_CHANGED(event, unit)
+	if(unit and unit ~= 'player') then return end
+
+	for index = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(index)
+		if(equipped(name)) then
+			updateInfo(name, icon)
+			break
+		else
+			updateInfo(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
+		end
+	end
+end
