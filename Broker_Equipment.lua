@@ -168,8 +168,8 @@ function addon:initialize(level)
 	UIDropDownMenu_AddButton(info, level)
 end
 
-function addon:ADDON_LOADED(event, addon)
-	if(addon ~= 'Broker_Equipment') then return end
+function addon:ADDON_LOADED(event, name)
+	if(name ~= 'Broker_Equipment') then return end
 
 	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
 
