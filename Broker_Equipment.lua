@@ -45,8 +45,6 @@ addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, .
 
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
-	text = L.NOSET,
-	icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=],
 	iconCoords = {0.065, 0.935, 0.065, 0.935}
 })
 
@@ -177,7 +175,7 @@ end
 function addon:ADDON_LOADED(event, addon)
 	if(addon ~= 'Broker_Equipment') then return end
 
-	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = broker.icon}
+	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
 
 	self.info = {}
 	self.displayMode = 'MENU'
