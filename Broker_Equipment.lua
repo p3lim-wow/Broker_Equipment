@@ -38,11 +38,7 @@ end
 
 
 local pending
-
 local addon = CreateFrame('Frame', 'Broker_EquipmentMenu')
-addon:RegisterEvent('ADDON_LOADED')
-addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
-
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
 	iconCoords = {0.065, 0.935, 0.065, 0.935}
@@ -212,3 +208,6 @@ function addon:UNIT_INVENTORY_CHANGED(event, unit)
 		end
 	end
 end
+
+addon:RegisterEvent('ADDON_LOADED')
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
