@@ -76,9 +76,9 @@ end
 
 local function menuClick(button, name, icon)
 	if(IsShiftKeyDown()) then
-		local dialog = StaticPopup_Show('CUSTOM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
-		dialog.name = name
-		dialog.icon = icon
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
+		dialog.data = name
+		dialog.selectedIcon = GetTextureIndex(icon)
 	elseif(IsControlKeyDown()) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
@@ -99,19 +99,6 @@ local function updateInfo(name, icon)
 	Broker_EquipmentDB.text = name
 	Broker_EquipmentDB.icon = icon
 end
-
--- Fuck blizzard!
-StaticPopupDialogs.CUSTOM_OVERWRITE_EQUIPMENT_SET = {
-	text = CONFIRM_OVERWRITE_EQUIPMENT_SET,
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(self) SaveEquipmentSet(self.name, GetTextureIndex(self.icon)); GearManagerDialogPopup:Hide() updateInfo(self.name, self.icon) end,
-	OnCancel = function() end,
-	OnHide = function(self) self.name, self.icon = nil, nil end,
-	hideOnEscape = 1,
-	timeout = 0,
-	exclusive = 1,
-}
 
 function broker:OnClick(button)
 	if(button == 'RightButton') then
