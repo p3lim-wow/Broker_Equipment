@@ -76,7 +76,7 @@ end
 
 local function menuClick(button, name, icon)
 	if(IsShiftKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name) -- Custom popup to update the info
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
 		dialog.data = name
 		dialog.selectedIcon = GetTextureIndex(icon)
 	elseif(IsControlKeyDown()) then
