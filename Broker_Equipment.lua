@@ -164,6 +164,7 @@ function addon:ADDON_LOADED(event, name)
 	self.displayMode = 'MENU'
 
 	self:UNIT_INVENTORY_CHANGED()
+	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
@@ -196,5 +197,6 @@ function addon:UNIT_INVENTORY_CHANGED(event, unit)
 	end
 end
 
+addon.EQUIPMENT_SETS_CHANGED = addon.UNIT_INVENTORY_CHANGED
 addon:RegisterEvent('ADDON_LOADED')
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
