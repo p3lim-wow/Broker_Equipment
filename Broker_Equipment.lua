@@ -163,7 +163,7 @@ function addon:ADDON_LOADED(event, name)
 	self.info = {}
 	self.displayMode = 'MENU'
 
-	self:UNIT_INVENTORY_CHANGED()
+	updateInfo(Broker_EquipmentDB.text, Broker_EquipmentDB.icon)
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
