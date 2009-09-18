@@ -57,8 +57,9 @@ local function GetTextureIndex(tex)
 end
 
 local function equipped(name)
-	local located
 	for slot, location in next, GetEquipmentSetLocations(name) do
+		local located = true
+
 		if(location == 0) then
 			located = not GetInventoryItemLink('player', slot)
 		elseif(location ~= 1) then
