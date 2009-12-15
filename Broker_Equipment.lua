@@ -9,33 +9,8 @@
 
 --]]
 
-local L = {}
-if(GetLocale() == 'deDE') then -- Katharsis / copystring
-	L.NOSET = 'Kein set'
-	L.TOOLTIP = 'Klicke links um dein set zu ändern\nKlicke rechts um den GearManager zu öffnen'
-	L.HINTS =  '|cff00ff00Shift-klicke um den set zu aktualisieren\nStrg-klicke um den set zu löschen|r'
-elseif(GetLocale() == 'frFR') then -- Soeters / Gnaf
-	L.NOSET = 'Pas de set'
-	L.TOOLTIP = 'Clic gauche pour changer d\'équipement\nClic droit pour ouvrir le gestionnaire d\'équipement'
-	L.HINTS = '|cff00ff00Maj-clic pour mettre à jour le set\nCtrl-clic pour supprimer le set|r'
-elseif(GetLocale() == 'zhCN') then -- yleaf
-	L.NOSET = '无套装'
-	L.TOOLTIP = '左键点击切换套装\n右键打开套装管理器'
-	L.HINTS = '|cff00ff00Shift点击覆盖套装\nCtrl点击删除套装|r'
-elseif(GetLocale() == 'zhTW') then -- yleaf
-	L.NOSET = '無套裝'
-	L.TOOLTIP = '左鍵點擊切換套裝\n右鍵點擊打開套裝管理器'
-	L.HINTS = '|cff00ff00Shift點擊覆蓋套裝\nCtrl點擊刪除套裝|r'
-elseif(GetLocale() == 'koKR') then -- mrgyver
-	L.NOSET = '세트 없음'
-	L.TOOLTIP = '좌-클릭 세트 변경\n우-클릭 장비 관리창 열기'
-	L.HINTS = '|cff00ff00Shift-클릭 하면 세트 업데이트\nCtrl-클릭 하면 세트 삭제|r'
-else
-	L.NOSET = 'No set'
-	L.TOOLTIP = 'Left-click to change your set\nRight-click to open GearManager'
-	L.HINTS = '|cff00ff00Shift-click to update set\nCtrl-click to delete set|r'
-end
-
+local addonName, addonTable = ...
+local L = addonTable.L
 
 local pending
 local addon = CreateFrame('Frame', 'Broker_EquipmentMenu')
@@ -125,7 +100,7 @@ end
 
 function broker:OnTooltipShow()
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(L.TOOLTIP)
+	self:AddLine(L[2])
 end
 
 function addon:initialize(level)
@@ -152,14 +127,14 @@ function addon:initialize(level)
 	info.notCheckable = 1
 	UIDropDownMenu_AddButton(info, level)
 
-	info.text = L.HINTS
+	info.text = L[3]
 	UIDropDownMenu_AddButton(info, level)
 end
 
 function addon:ADDON_LOADED(event, name)
 	if(name ~= 'Broker_Equipment') then return end
 
-	Broker_EquipmentDB = Broker_EquipmentDB or {text = L.NOSET, icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
+	Broker_EquipmentDB = Broker_EquipmentDB or {text = L[1], icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
 
 	self.info = {}
 	self.displayMode = 'MENU'
