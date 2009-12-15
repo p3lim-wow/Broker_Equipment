@@ -13,8 +13,8 @@ local addonName, addonTable = ...
 local L = addonTable.L
 
 local pending
-local addon = CreateFrame('Frame', 'Broker_EquipmentMenu')
-local broker = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
+local addon = CreateFrame('Frame', addonName)
+local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 	type = 'data source',
 	iconCoords = {0.065, 0.935, 0.065, 0.935}
 })
@@ -132,7 +132,7 @@ function addon:initialize(level)
 end
 
 function addon:ADDON_LOADED(event, name)
-	if(name ~= 'Broker_Equipment') then return end
+	if(name ~= addonName) then return end
 
 	Broker_EquipmentDB = Broker_EquipmentDB or {text = L[1], icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
 
