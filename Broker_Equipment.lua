@@ -9,8 +9,8 @@
 
 --]]
 
-local addonName, addonTable = ...
-local L = addonTable.L
+local addonName, ns = ...
+local L = ns.L
 
 local pendingName, pendingIcon
 local addon = CreateFrame('Frame', addonName)

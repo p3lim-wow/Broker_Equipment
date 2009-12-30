@@ -1,6 +1,6 @@
 ﻿
-local _, addonTable = ...
-addonTable.L = GetLocale() == 'deDE' and {-- Katharsis / copystring
+local _, ns = ...
+ns.L = GetLocale() == 'deDE' and {-- Katharsis / copystring
 	'Kein set',
 	'Klicke links um dein set zu ändern\nKlicke rechts um den GearManager zu öffnen',
 	'|cff00ff00Shift-klicke um den set zu aktualisieren\nStrg-klicke um den set zu löschen|r',
