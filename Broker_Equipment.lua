@@ -69,7 +69,7 @@ local function menuClick(button, name, icon)
 end
 
 local function updateInfo(name, icon)
-	broker.text = InCombatLockdown() and '|cffff0000'..pendingName or name
+	broker.text = pendingName and '|cffff0000'..pendingName or name
 	broker.icon = pendingIcon or icon
 
 	Broker_EquipmentDB.text = pendingName or name
