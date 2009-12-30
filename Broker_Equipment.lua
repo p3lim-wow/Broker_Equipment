@@ -12,7 +12,7 @@
 local addonName, addonTable = ...
 local L = addonTable.L
 
-local pending
+local pendingName, pendingIcon
 local addon = CreateFrame('Frame', addonName)
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 	type = 'data source',
@@ -62,18 +62,18 @@ local function menuClick(button, name, icon)
 		EquipmentManager_EquipSet(name)
 
 		if(InCombatLockdown()) then
-			pending = name
+			pendingName, pendingIcon = name, icon
 			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
 		end
 	end
 end
 
 local function updateInfo(name, icon)
-	broker.text = InCombatLockdown() and '|cffff0000'..name or name
-	broker.icon = icon
+	broker.text = InCombatLockdown() and '|cffff0000'..pendingName or name
+	broker.icon = pendingIcon or icon
 
-	Broker_EquipmentDB.text = name
-	Broker_EquipmentDB.icon = icon
+	Broker_EquipmentDB.text = pendingName or name
+	Broker_EquipmentDB.icon = pendingIcon or icon
 end
 
 function broker:OnClick(button)
@@ -154,8 +154,8 @@ function addon:VARIABLES_LOADED(event)
 end
 
 function addon:PLAYER_REGEN_ENABLED(event)
-	EquipmentManager_EquipSet(pending)
-	pending = nil
+	EquipmentManager_EquipSet(pendingName)
+	pendingName, pendingIcon = nil, nil
 	self:UnregisterEvent(event)
 end
 
