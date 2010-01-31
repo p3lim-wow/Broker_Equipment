@@ -28,6 +28,10 @@ ns.L = GetLocale() == 'deDE' and {
 	'Sin set',
 	'Click izquierdo para combiar tu set\nClick derecho para abrir el Administrador de Equipo',
 	'|cff00ff00Shift-click para modificar set\nCtrl-click para eliminar set',
+} or GetLocale() == 'esMX' and {
+	'Sin set',
+	'Click izquierdo para cambiar tu set\nClick derecho para abrir el Administrador de Equipo',
+	'|cff00ff00Shift-click para modificar set\nCtrl-click para eliminar set',
 } or {
 	'No set',
 	'Left-click to change your set\nRight-click to open GearManager',
