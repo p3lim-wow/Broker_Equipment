@@ -24,6 +24,10 @@ ns.L = GetLocale() == 'deDE' and {
 	'세트 없음',
 	'좌-클릭 세트 변경\n우-클릭 장비 관리창 열기',
 	'|cff00ff00Shift-클릭 하면 세트 업데이트\nCtrl-클릭 하면 세트 삭제|r',
+} or GetLocale() == 'esES' and {
+	'Sin set',
+	'Click izquierdo para combiar tu set\nClick derecho para abrir el Administrador de Equipo',
+	'|cff00ff00Shift-click para modificar set\nCtrl-click para eliminar set',
 } or {
 	'No set',
 	'Left-click to change your set\nRight-click to open GearManager',
