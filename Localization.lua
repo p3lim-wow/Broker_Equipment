@@ -6,8 +6,8 @@
 local _, ns = ...
 ns.L = GetLocale() == 'deDE' and {
 	'Kein set',
-	'Klicke links um dein set zu ändern\nKlicke rechts um den GearManager zu öffnen',
-	'|cff00ff00Shift-klicke um den set zu aktualisieren\nStrg-klicke um den set zu löschen|r',
+	'Links-Klick um Set zu wechseln\nRechts-Klocl um den Ausrüstungsmanager zu öffnen',
+	'|cff00ff00Shift + Links-Klick um Set zu aktualisieren\nStrg + Links-Klick um Set zu löschen|r',
 } or GetLocale() == 'frFR' and {
 	'Pas de set',
 	'Clic gauche pour changer d\'équipement\nClic droit pour ouvrir le gestionnaire d\'équipement',
