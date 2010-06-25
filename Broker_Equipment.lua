@@ -79,8 +79,10 @@ function broker:OnClick(button)
 		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
 	else
 		local paperdoll = PaperDollFrame:IsVisible()
-		if(not paperdoll or paperdoll and not GearManagerDialog:IsVisible()) then
+		if(not paperdoll) then
 			ToggleCharacter('PaperDollFrame')
+			GearManagerDialog:Show()
+		elseif(paperdoll and not GearManagerDialog:IsVisible()) then
 			GearManagerDialog:Show()
 		end
 	end
