@@ -5,10 +5,9 @@
 ## Notes: LDB Equipment Manager plug-in
 ## SavedVariablesPerCharacter: Broker_EquipmentDB
 
-Localization.lua
-
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1.lua
 
+Localization.lua
 Broker_Equipment.lua

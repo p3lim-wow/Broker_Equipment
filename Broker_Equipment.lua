@@ -10,16 +10,24 @@
 --]]
 
 local addonName, ns = ...
-local L = ns.L
 
-local pendingName, pendingIcon
+local pending = {}
 local addon = CreateFrame('Frame', addonName)
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
-	type = 'data source',
-	iconCoords = {0.065, 0.935, 0.065, 0.935}
+	iconCoords = {0.08, 0.92, 0.08, 0.92},
+	type = 'data source'
 })
 
--- Borrowed from tekkub's EquipSetUpdater
+local function Update(name, icon)
+	broker.text = pending.name and '|cffff0000'..pending.name or name
+	broker.icon = pending.icon or icon
+
+	Broker_EquipmentDB.name = pending.name or name
+	Broker_EquipmentDB.icon = pending.icon or icon
+end
+
+-- Borrowed from tekkub's EquipSetUpdater (modified)
+-- We really need a proper API for this
 local function GetTextureIndex(tex)
 	RefreshEquipmentSetIconInfo()
 	tex = tex:lower()
@@ -31,10 +39,27 @@ local function GetTextureIndex(tex)
 	end
 end
 
-local function equipped(name)
-	for slot, location in next, GetEquipmentSetLocations(name) do
-		local located = true
+local function ModifiedClick(button, name, icon)
+	if(IsShiftKeyDown()) then
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
+		dialog.data = name
+		dialog.selectedIcon = GetTextureIndex(icon)
+	elseif(IsControlKeyDown()) then
+		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
+		dialog.data = name
+	else
+		EquipmentManager_EquipSet(name)
 
+		if(InCombatLockdown()) then
+			pending.name, pending.icon = name, icon
+			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
+		end
+	end
+end
+
+local function EquipmentLocated(name)
+	for slot, location in pairs(GetEquipmentSetLocations(name)) do
+		local located = true
 		if(location == 0) then
 			located = not GetInventoryItemLink('player', slot)
 		elseif(location ~= 1) then
@@ -50,129 +75,89 @@ local function equipped(name)
 	return true
 end
 
-local function menuClick(button, name, icon)
-	if(IsShiftKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
-		dialog.data = name
-		dialog.selectedIcon = GetTextureIndex(icon)
-	elseif(IsControlKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
-		dialog.data = name
-	else
-		EquipmentManager_EquipSet(name)
-
-		if(InCombatLockdown()) then
-			pendingName, pendingIcon = name, icon
-			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
-		end
-	end
-end
-
-local function updateInfo(name, icon)
-	broker.text = pendingName and '|cffff0000'..pendingName or name
-	broker.icon = pendingIcon or icon
-
-	Broker_EquipmentDB.text = pendingName or name
-	Broker_EquipmentDB.icon = pendingIcon or icon
+function broker:OnTooltipShow()
+	self:AddLine('|cff0090ffBroker Equipment|r')
+	self:AddLine(ns.L[1])
+	self:AddLine(ns.L[2])
 end
 
 function broker:OnClick(button)
-	if(button == 'RightButton') then
-		if(GearManagerDialog:IsVisible()) then
-			if(PaperDollFrame:IsVisible()) then
-				ToggleCharacter('PaperDollFrame')
-			end
-			GearManagerDialog:Hide()
-		else
-			if(not PaperDollFrame:IsVisible()) then
-				ToggleCharacter('PaperDollFrame')
-			end
+	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
+		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
+	else
+		local paperdoll = PaperDollFrame:IsVisible()
+		if(not paperdoll or paperdoll and not GearManagerDialog:IsVisible()) then
+			ToggleCharacter('PaperDollFrame')
 			GearManagerDialog:Show()
 		end
-	elseif(GetNumEquipmentSets() > 0) then
-		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
-	end
-
-	if(GameTooltip:GetOwner() == self) then
-		GameTooltip:Hide()
 	end
 end
 
-function broker:OnTooltipShow()
-	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(L[2])
-end
-
-function addon:initialize(level)
+function addon:initialize(...)
 	local info = wipe(self.info)
 	info.isTitle = 1
 	info.notCheckable = 1
 	info.text = '|cff0090ffBroker Equipment|r\n '
-	UIDropDownMenu_AddButton(info, level)
+	UIDropDownMenu_AddButton(info, ...)
 
 	wipe(info)
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
-		info.text = string.format('|T%s:20|t %s', icon, name)
+		info.text = '|T'..icon..':20|t '..name
 		info.arg1 = name
 		info.arg2 = icon
-		info.func = menuClick
-		info.checked = equipped(name) or pending and pending == name
-		UIDropDownMenu_AddButton(info, level)
+		info.func = ModifiedClick
+		info.checked = EquipmentLocated(name) or pending.name and pending.name == name
+		UIDropDownMenu_AddButton(info, ...)
 	end
 
 	wipe(info)
-	info.text = ' '
 	info.disabled = 1
 	info.notCheckable = 1
-	UIDropDownMenu_AddButton(info, level)
 
-	info.text = L[3]
-	UIDropDownMenu_AddButton(info, level)
+	info.text = ns.L[3]
+	UIDropDownMenu_AddButton(info, ...)
+
+	info.text = ns.L[4]
+	UIDropDownMenu_AddButton(info, ...)
 end
 
-function addon:ADDON_LOADED(event, name)
+function addon:ADDON_LOADED(name, event)
 	if(name ~= addonName) then return end
-
-	Broker_EquipmentDB = Broker_EquipmentDB or {text = L[1], icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=]}
+	Broker_EquipmentDB = Broker_EquipmentDB or {}
 
 	self.info = {}
 	self.displayMode = 'MENU'
-
-	updateInfo(Broker_EquipmentDB.text, Broker_EquipmentDB.icon)
-	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UnregisterEvent(event)
+	self:UNIT_INVENTORY_CHANGED()
 end
 
-function addon:VARIABLES_LOADED(event)
-	SetCVar('equipmentManager', 1)
-	GearManagerToggleButton:Show()
-
-	self:UnregisterEvent(event)
-end
-
-function addon:PLAYER_REGEN_ENABLED(event)
-	EquipmentManager_EquipSet(pendingName)
-	pendingName, pendingIcon = nil, nil
-	self:UnregisterEvent(event)
-end
-
-function addon:UNIT_INVENTORY_CHANGED(event, unit)
+function addon:UNIT_INVENTORY_CHANGED(unit)
 	if(unit and unit ~= 'player') then return end
 
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
-		if(equipped(name)) then
-			updateInfo(name, icon)
-			break
+		if(EquipmentLocated(name)) then
+			return Update(name, icon)
 		else
-			updateInfo(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
+			Update(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
 		end
 	end
 end
 
-addon.EQUIPMENT_SETS_CHANGED = addon.UNIT_INVENTORY_CHANGED
+function addon:PLAYER_REGEN_ENABLED(event)
+	ModifiedClick(nil, pending.name, pending.icon)
+	self:UnregisterEvent(event)
+	pending = {}
+end
+
+function addon:VARIABLES_LOADED(var, event)
+	SetCVar('equipmentManager', 1)
+	GearManagerToggleButton:Show()
+	self:UnregisterEvent(event)
+end
+
 addon:RegisterEvent('ADDON_LOADED')
-addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self, ..., event) end)
