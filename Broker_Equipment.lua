@@ -111,15 +111,17 @@ function addon:initialize(...)
 		UIDropDownMenu_AddButton(info, ...)
 	end
 
-	wipe(info)
-	info.disabled = 1
-	info.notCheckable = 1
+	if(SHOW_NEWBIE_TIPS == '1') then
+		wipe(info)
+		info.disabled = 1
+		info.notCheckable = 1
 
-	info.text = ns.L[3]
-	UIDropDownMenu_AddButton(info, ...)
+		info.text = ns.L[3]
+		UIDropDownMenu_AddButton(info, ...)
 
-	info.text = ns.L[4]
-	UIDropDownMenu_AddButton(info, ...)
+		info.text = ns.L[4]
+		UIDropDownMenu_AddButton(info, ...)
+	end
 end
 
 function addon:ADDON_LOADED(name, event)
