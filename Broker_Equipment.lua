@@ -35,8 +35,9 @@ local function GetTextureIndex(tex)
 	for i=INVSLOT_FIRST_EQUIPPED,INVSLOT_LAST_EQUIPPED do if GetInventoryItemTexture("player", i) then numicons = numicons + 1 end end
 	for i=1,numicons do
 		local texture, index = GetEquipmentSetIconInfo(i)
-		if texture:lower() == tex then return index end
+		if texture and texture:lower() == tex then return index end
 	end
+	return 1
 end
 
 local function ModifiedClick(button, name, icon)
