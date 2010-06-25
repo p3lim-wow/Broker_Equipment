@@ -3,7 +3,6 @@
 ## Version: 30300.9-Release
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
-## SavedVariablesPerCharacter: Broker_EquipmentDB
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua

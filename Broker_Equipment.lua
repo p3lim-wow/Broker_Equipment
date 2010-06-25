@@ -18,14 +18,6 @@ local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
 	type = 'data source'
 })
 
-local function Update(name, icon)
-	broker.text = pending.name and '|cffff0000'..pending.name or name
-	broker.icon = pending.icon or icon
-
-	Broker_EquipmentDB.name = pending.name or name
-	Broker_EquipmentDB.icon = pending.icon or icon
-end
-
 -- Borrowed from tekkub's EquipSetUpdater (modified)
 -- We really need a proper API for this
 local function GetTextureIndex(tex)
@@ -125,27 +117,31 @@ function addon:initialize(...)
 	end
 end
 
-function addon:ADDON_LOADED(name, event)
-	if(name ~= addonName) then return end
-	Broker_EquipmentDB = Broker_EquipmentDB or {}
-
+function addon:PLAYER_LOGIN(event)
 	self.info = {}
 	self.displayMode = 'MENU'
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
-	self:UnregisterEvent(event)
 	self:UNIT_INVENTORY_CHANGED()
 end
 
-function addon:UNIT_INVENTORY_CHANGED(unit)
+function addon:UNIT_INVENTORY_CHANGED(unit, event)
 	if(unit and unit ~= 'player') then return end
 
-	for index = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(index)
-		if(EquipmentLocated(name)) then
-			return Update(name, icon)
-		else
-			Update(UNKNOWN, [=[Interface\Icons\INV_Misc_QuestionMark]=])
+	if(InCombatLockdown() and pending.name) then
+		broker.text = '|cffff0000'..pending.name
+		broker.icon = pending.icon
+	else
+		for index = 1, GetNumEquipmentSets() do
+			local name, icon = GetEquipmentSetInfo(index)
+			if(EquipmentLocated(name)) then
+				broker.text = name
+				broker.icon = icon
+				return
+			else
+				broker.text = UNKNOWN
+				broker.icon = [=[Interface\Icons\INV_Misc_QuestionMark]=]
+			end
 		end
 	end
 end
@@ -162,5 +158,5 @@ function addon:VARIABLES_LOADED(var, event)
 	self:UnregisterEvent(event)
 end
 
-addon:RegisterEvent('ADDON_LOADED')
+addon:RegisterEvent('PLAYER_LOGIN')
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, ..., event) end)
