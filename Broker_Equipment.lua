@@ -119,12 +119,19 @@ function addon:initialize(...)
 	end
 end
 
-function addon:PLAYER_LOGIN(event)
+function addon:PLAYER_LOGIN()
 	self.info = {}
 	self.displayMode = 'MENU'
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('VARIABLES_LOADED')
 	self:UNIT_INVENTORY_CHANGED()
+end
+
+function addon:ADDON_LOADED(name, event)
+	if(name == addonName) then
+		self:UnregisterEvent(event)
+		self:PLAYER_LOGIN()
+	end
 end
 
 function addon:UNIT_INVENTORY_CHANGED(unit, event)
@@ -160,5 +167,5 @@ function addon:VARIABLES_LOADED(var, event)
 	self:UnregisterEvent(event)
 end
 
-addon:RegisterEvent('PLAYER_LOGIN')
+addon:RegisterEvent(IsAddOnLoaded('AddonLoader') and 'ADDON_LOADED' or 'PLAYER_LOGIN')
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, ..., event) end)
