@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Author: p3lim
-## Version: 30300.9-Release
+## Version: 30300.10-Release
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
 
