@@ -127,14 +127,7 @@ function addon:PLAYER_LOGIN()
 	self:UNIT_INVENTORY_CHANGED()
 end
 
-function addon:ADDON_LOADED(name, event)
-	if(name == addonName) then
-		self:UnregisterEvent(event)
-		self:PLAYER_LOGIN()
-	end
-end
-
-function addon:UNIT_INVENTORY_CHANGED(unit, event)
+function addon:UNIT_INVENTORY_CHANGED(event, unit)
 	if(unit and unit ~= 'player') then return end
 
 	if(InCombatLockdown() and pending.name) then
@@ -161,11 +154,15 @@ function addon:PLAYER_REGEN_ENABLED(event)
 	pending = {}
 end
 
-function addon:VARIABLES_LOADED(var, event)
+function addon:VARIABLES_LOADED(event)
 	SetCVar('equipmentManager', 1)
 	GearManagerToggleButton:Show()
 	self:UnregisterEvent(event)
 end
 
-addon:RegisterEvent(IsAddOnLoaded('AddonLoader') and 'ADDON_LOADED' or 'PLAYER_LOGIN')
-addon:SetScript('OnEvent', function(self, event, ...) self[event](self, ..., event) end)
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+if(IsAddOnLoaded('AddonLoader')) then
+	addon:PLAYER_LOGIN()
+else
+	addon:RegisterEvent('PLAYER_LOGIN')
+end
