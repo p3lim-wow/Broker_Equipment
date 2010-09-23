@@ -123,7 +123,6 @@ function addon:PLAYER_LOGIN()
 	self.info = {}
 	self.displayMode = 'MENU'
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
-	self:RegisterEvent('VARIABLES_LOADED')
 	self:UNIT_INVENTORY_CHANGED()
 end
 
@@ -154,15 +153,5 @@ function addon:PLAYER_REGEN_ENABLED(event)
 	pending = {}
 end
 
-function addon:VARIABLES_LOADED(event)
-	SetCVar('equipmentManager', 1)
-	GearManagerToggleButton:Show()
-	self:UnregisterEvent(event)
-end
-
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
-if(IsAddOnLoaded('AddonLoader')) then
-	addon:PLAYER_LOGIN()
-else
-	addon:RegisterEvent('PLAYER_LOGIN')
-end
+addon:RegisterEvent('PLAYER_LOGIN')

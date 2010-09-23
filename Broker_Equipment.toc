@@ -1,11 +1,8 @@
-## Interface: 30300
+## Interface: 40000
 ## Author: p3lim
-## Version: 30300.10-Release
+## Version: Alpha
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
-
-## LoadManagers: AddonLoader
-## X-LoadOn-Always: delayed
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua
