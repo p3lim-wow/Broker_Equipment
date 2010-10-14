@@ -1,6 +1,6 @@
 ## Interface: 40000
 ## Author: p3lim
-## Version: Alpha
+## Version: 40000.11-Release
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
 
