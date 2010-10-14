@@ -9,48 +9,13 @@
 
 --]]
 
-local addonName, ns = ...
+local LDB
+local pendingName
+local pendingIcon
 
-local pending = {}
-local addon = CreateFrame('Frame', addonName)
-local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
-	text = UNKNOWN,
-	icon = [=[Interface\Icons\INV_Misc_QuestionMark]=],
-	iconCoords = {0.08, 0.92, 0.08, 0.92},
-	type = 'data source'
-})
-
--- Borrowed from tekkub's EquipSetUpdater (modified)
--- We really need a proper API for this
-local function GetTextureIndex(tex)
-	RefreshEquipmentSetIconInfo()
-	tex = tex:lower()
-	local numicons = GetNumMacroIcons()
-	for i=INVSLOT_FIRST_EQUIPPED,INVSLOT_LAST_EQUIPPED do if GetInventoryItemTexture("player", i) then numicons = numicons + 1 end end
-	for i=1,numicons do
-		local texture, index = GetEquipmentSetIconInfo(i)
-		if texture and texture:lower() == tex then return index end
-	end
-	return 1
-end
-
-local function ModifiedClick(button, name, icon)
-	if(IsShiftKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
-		dialog.data = name
-		dialog.selectedIcon = GetTextureIndex(icon)
-	elseif(IsControlKeyDown()) then
-		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
-		dialog.data = name
-	else
-		EquipmentManager_EquipSet(name)
-
-		if(InCombatLockdown()) then
-			pending.name, pending.icon = name, icon
-			addon:RegisterEvent('PLAYER_REGEN_ENABLED')
-		end
-	end
-end
+local menu = {}
+local locale = select(2, ...).L
+local parent = CreateFrame('Frame', 'tester')
 
 local function EquipmentLocated(name)
 	for slot, location in pairs(GetEquipmentSetLocations(name)) do
@@ -70,90 +35,132 @@ local function EquipmentLocated(name)
 	return true
 end
 
-function broker:OnTooltipShow()
-	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(ns.L[1])
-	self:AddLine(ns.L[2])
-end
-
-function broker:OnClick(button)
-	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
-		ToggleDropDownMenu(1, nil, addon, self, 0, 0)
-	else
-		local paperdoll = PaperDollFrame:IsVisible()
-		if(not paperdoll) then
-			ToggleCharacter('PaperDollFrame')
-			GearManagerDialog:Show()
-		elseif(paperdoll and not GearManagerDialog:IsVisible()) then
-			GearManagerDialog:Show()
-		end
-	end
-end
-
-function addon:initialize(...)
-	local info = wipe(self.info)
-	info.isTitle = 1
-	info.notCheckable = 1
-	info.text = '|cff0090ffBroker Equipment|r\n '
-	UIDropDownMenu_AddButton(info, ...)
-
-	wipe(info)
-	for index = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(index)
-		info.text = '|T'..icon..':20|t '..name
-		info.arg1 = name
-		info.arg2 = icon
-		info.func = ModifiedClick
-		info.checked = EquipmentLocated(name) or pending.name and pending.name == name
-		UIDropDownMenu_AddButton(info, ...)
-	end
-
-	if(SHOW_NEWBIE_TIPS == '1') then
-		wipe(info)
-		info.disabled = 1
-		info.notCheckable = 1
-
-		info.text = ns.L[3]
-		UIDropDownMenu_AddButton(info, ...)
-
-		info.text = ns.L[4]
-		UIDropDownMenu_AddButton(info, ...)
-	end
-end
-
-function addon:PLAYER_LOGIN()
-	self.info = {}
-	self.displayMode = 'MENU'
-	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
-	self:UNIT_INVENTORY_CHANGED()
-end
-
-function addon:UNIT_INVENTORY_CHANGED(event, unit)
-	if(unit and unit ~= 'player') then return end
-
-	if(InCombatLockdown() and pending.name) then
-		broker.text = '|cffff0000'..pending.name
-		broker.icon = pending.icon
+local function UpdateDisplay()
+	if(InCombatLockdown() and pendingName) then
+		LDB.text = '|cffff0000'..pendingName
+		LDB.icon = pendingIcon
 	else
 		for index = 1, GetNumEquipmentSets() do
 			local name, icon = GetEquipmentSetInfo(index)
 			if(EquipmentLocated(name)) then
-				broker.text = name
-				broker.icon = icon
+				LDB.text = name
+				LDB.icon = icon
 				return
 			else
-				broker.text = UNKNOWN
-				broker.icon = [=[Interface\Icons\INV_Misc_QuestionMark]=]
+				LDB.text = UNKNOWN
+				LDB.icon = [=[Interface\Icons\INV_Misc_QuestionMark]=]
 			end
 		end
 	end
 end
 
-function addon:PLAYER_REGEN_ENABLED(event)
-	ModifiedClick(nil, pending.name, pending.icon)
-	self:UnregisterEvent(event)
-	pending = {}
+-- Borrowed from tekkub's EquipSetUpdater
+local function GetTextureIndex(texture)
+	RefreshEquipmentSetIconInfo()
+	
+	local numIcons = GetNumMacroIcons()
+	for index = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
+		if(GetInventoryItemTexture('player', index)) then
+			numIcons = numIcons + 1
+		end
+	end
+
+	for index = 1, numIcons do
+		local icon, textureIndex = GetEquipmentSetIconInfo(index)
+		if(icon == texture) then
+			return textureIndex
+		end
+	end
 end
 
-addon:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
-addon:RegisterEvent('PLAYER_LOGIN')
+local function ModifiedClick(button, name, icon)
+	if(IsShiftKeyDown() and not pendingName) then
+		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
+		dialog.data = name
+		dialog.selectedIcon = GetTextureIndex(icon)
+	elseif(IsControlKeyDown() and not pendingName) then
+		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
+		dialog.data = name
+	else
+		EquipmentManager_EquipSet(name)
+
+		if(InCombatLockdown()) then
+			parent:RegisterEvent('PLAYER_REGEN_ENABLED')
+
+			pendingName = name
+			pendingIcon = icon
+			UpdateDisplay()
+		end
+	end
+end
+
+local function OnTooltipShow(self)
+	self:AddLine('|cff0090ffBroker Equipment|r')
+	self:AddLine(locale[1])
+	self:AddLine(locale[2])
+	self:AddLine(locale[3])
+	self:AddLine(locale[4])
+end
+
+local function OnClick(self, button)
+	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
+		ToggleDropDownMenu(1, nil, parent, self, 0, 0)
+	else
+		if(not PaperDollFrame:IsVisible()) then
+			ToggleCharacter('PaperDollFrame')
+		end
+
+		if(not GearManagerDialog:IsVisible()) then
+			GearManagerDialog:Show()
+		end
+	end
+end
+
+local function CreateMenu()
+	menu = wipe(menu)
+	for index = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(index)
+		menu.text = string.format('|T%s:26|t %s%s', icon, EquipmentLocated(name) and '|cff00ff00' or pendingName and pendingName == name and '|cffff0000' or '', name)
+		menu.func = ModifiedClick
+		menu.arg1 = name
+		menu.arg2 = icon
+		menu.notCheckable = 1
+
+		UIDropDownMenu_AddButton(menu)
+	end
+end
+
+function parent:PLAYER_LOGIN()
+	LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
+		icon = [=[Interface\Icons\INV_Misc_QuestionMark]=],
+		iconCoords = {0.08, 0.92, 0.08, 0.92},
+		text = UNKNOWN,
+		type = 'data source',
+		OnTooltipShow = OnTooltipShow,
+		OnClick = OnClick,
+	})
+
+	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
+	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
+	self.EQUIPMENT_SETS_CHANGED = UpdateDisplay
+
+	self.initialize = CreateMenu
+	self.displayMode = 'MENU'
+
+	UpdateDisplay()
+end
+
+function parent:UNIT_INVENTORY_CHANGED(unit)
+	if(unit == 'player') then
+		UpdateDisplay()
+	end
+end
+
+function parent:PLAYER_REGEN_ENABLED()
+	self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+	ModifiedClick(nil, pendingName, pendingIcon)
+	pendingName, pendingIcon = nil, nil
+end
+
+parent:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
+parent:RegisterEvent('PLAYER_LOGIN')
