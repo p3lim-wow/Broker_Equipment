@@ -15,7 +15,7 @@ local pendingIcon
 
 local menu = {}
 local locale = select(2, ...).L
-local parent = CreateFrame('Frame', 'tester')
+local parent = CreateFrame('Frame')
 
 local function EquipmentLocated(name)
 	for slot, location in pairs(GetEquipmentSetLocations(name)) do
