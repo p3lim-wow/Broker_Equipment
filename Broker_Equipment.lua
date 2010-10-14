@@ -14,6 +14,8 @@ local addonName, ns = ...
 local pending = {}
 local addon = CreateFrame('Frame', addonName)
 local broker = LibStub('LibDataBroker-1.1'):NewDataObject(addonName, {
+	text = UNKNOWN,
+	icon = [=[Interface\Icons\INV_Misc_QuestionMark]=],
 	iconCoords = {0.08, 0.92, 0.08, 0.92},
 	type = 'data source'
 })
