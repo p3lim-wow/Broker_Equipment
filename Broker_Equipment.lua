@@ -14,7 +14,7 @@ local pendingName
 local pendingIcon
 
 local menu = {}
-local locale = select(2, ...).L
+local localization = select(2, ...).L
 local parent = CreateFrame('Frame')
 
 local function EquipmentLocated(name)
@@ -96,10 +96,10 @@ end
 
 local function OnTooltipShow(self)
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(locale[1])
-	self:AddLine(locale[2])
-	self:AddLine(locale[3])
-	self:AddLine(locale[4])
+	self:AddLine(localization['Left-click'])
+	self:AddLine(localization['Right-click'])
+	self:AddLine(localization['Shift-click'])
+	self:AddLine(localization['Ctrl-click'])
 end
 
 local function OnClick(self, button)
