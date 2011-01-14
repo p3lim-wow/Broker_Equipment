@@ -120,8 +120,9 @@ local function CreateMenu()
 	menu = wipe(menu)
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
-		menu.text = string.format('|T%s:26|t %s%s', icon, EquipmentLocated(name) and '|cff00ff00' or pendingName and pendingName == name and '|cffff0000' or '', name)
 		menu.func = ModifiedClick
+		menu.text = string.format('%s%s', EquipmentLocated(name) and '|cff00ff00' or pendingName and pendingName == name and '|cffff0000' or '', name)
+		menu.icon = icon
 		menu.arg1 = name
 		menu.arg2 = icon
 		menu.notCheckable = 1
