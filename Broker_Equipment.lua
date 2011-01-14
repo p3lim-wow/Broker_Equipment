@@ -96,10 +96,8 @@ end
 
 local function OnTooltipShow(self)
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine(localization['Left-click'])
-	self:AddLine(localization['Right-click'])
-	self:AddLine(localization['Shift-click'])
-	self:AddLine(localization['Ctrl-click'])
+	self:AddLine('|cff00ff00<' .. localization['Left-click'] .. '>|r')
+	self:AddLine('|cff00ff00<' .. localization['Right-click'] .. '>|r')
 end
 
 local function OnClick(self, button)
@@ -129,6 +127,15 @@ local function CreateMenu()
 
 		UIDropDownMenu_AddButton(menu)
 	end
+
+	menu = wipe(menu)
+	menu.notCheckable = true
+
+	menu.text = '|cff00ff00<' .. localization['Shift-click'] .. '>|r'
+	UIDropDownMenu_AddButton(menu)
+
+	menu.text = '|cff00ff00<' .. localization['Ctrl-click'] .. '>|r'
+	UIDropDownMenu_AddButton(menu)
 end
 
 function parent:PLAYER_LOGIN()
