@@ -121,11 +121,11 @@ local function CreateMenu()
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
 		menu.func = ModifiedClick
-		menu.text = string.format('%s%s', EquipmentLocated(name) and '|cff00ff00' or pendingName and pendingName == name and '|cffff0000' or '', name)
+		menu.text = string.format('%s%s', pendingName and pendingName == name and '|cffff0000' or '', name)
 		menu.icon = icon
 		menu.arg1 = name
 		menu.arg2 = icon
-		menu.notCheckable = 1
+		menu.checked = EquipmentLocated(name)
 
 		UIDropDownMenu_AddButton(menu)
 	end
