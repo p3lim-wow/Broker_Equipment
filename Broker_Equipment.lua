@@ -101,6 +101,10 @@ local function OnTooltipShow(self)
 end
 
 local function OnClick(self, button)
+	if(GameTooltip:GetOwner() == self) then
+		GameTooltip:Hide()
+	end
+
 	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
 		ToggleDropDownMenu(1, nil, parent, self, 0, 0)
 	else
