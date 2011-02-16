@@ -42,7 +42,7 @@ ns.L = GetLocale() == 'deDE' and {
 } or GetLocale() == 'ruRU' and {
 	['Ctrl-click'] = 'Ctrl-клик, чтобы удалить комплект',
 	['Left-click'] = 'Левая кнопка, чтобы переключить комплект',
-	['Right-click'] = 'Правая кнопка, чтобы открыть управление экипировки',
+	['Right-click'] = 'Правая кнопка, чтобы открыть управление экипировкой',
 	['Shift-click'] = 'Shift-клик, чтобы обновить комплект',
 } or {
 	['Ctrl-click'] = 'Ctrl-click to delete set',
