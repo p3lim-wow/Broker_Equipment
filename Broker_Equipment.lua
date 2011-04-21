@@ -126,9 +126,9 @@ end
 
 function parent:PLAYER_LOGIN()
 	LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
-		icon = [=[Interface\Icons\INV_Misc_QuestionMark]=],
+		icon = [=[Interface\PaperDollInfoFrame\UI-EquipmentManager-Toggle]=],
 		iconCoords = {0.08, 0.92, 0.08, 0.92},
-		text = UNKNOWN,
+		text = 'Broker Equipment',
 		type = 'data source',
 		OnTooltipShow = OnTooltipShow,
 		OnClick = OnClick,
