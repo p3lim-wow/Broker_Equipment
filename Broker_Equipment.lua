@@ -54,30 +54,12 @@ local function UpdateDisplay()
 	end
 end
 
--- Borrowed from tekkub's EquipSetUpdater
-local function GetTextureIndex(texture)
-	RefreshEquipmentSetIconInfo()
-	
-	local numIcons = GetNumMacroIcons()
-	for index = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
-		if(GetInventoryItemTexture('player', index)) then
-			numIcons = numIcons + 1
-		end
-	end
-
-	for index = 1, numIcons do
-		local icon, textureIndex = GetEquipmentSetIconInfo(index)
-		if(icon == texture) then
-			return textureIndex
-		end
-	end
-end
-
 local function ModifiedClick(button, name, icon)
 	if(IsShiftKeyDown() and not pendingName) then
-		local dialog = StaticPopup_Show('CONFIRM_OVERWRITE_EQUIPMENT_SET', name)
-		dialog.data = name
-		dialog.selectedIcon = GetTextureIndex(icon)
+		LDB.OnClick(nil, 'RightButton')
+
+		GearManagerDialog.selectedSetName = name
+		GearManagerDialog_Update()
 	elseif(IsControlKeyDown() and not pendingName) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
