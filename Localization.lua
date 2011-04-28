@@ -40,10 +40,10 @@ ns.L = GetLocale() == 'deDE' and {
 	['Right-click'] = 'Clic derecho para abrir el Gestor de equipamiento',
 	['Shift-click'] = 'May\195\186s+clic para modificar este equipamiento',
 } or GetLocale() == 'ruRU' and {
-	['Ctrl-click'] = 'Ctrl-click to delete set',
-	['Left-click'] = 'Left-click to change your set',
-	['Right-click'] = 'Right-click to open GearManager',
-	['Shift-click'] = 'Shift-click to update set',
+	['Ctrl-click'] = 'Ctrl-клик, чтобы удалить комплект',
+	['Left-click'] = 'Левая кнопка, чтобы переключить комплект',
+	['Right-click'] = 'Правая кнопка, чтобы открыть управление экипировкой',
+	['Shift-click'] = 'Shift-клик, чтобы обновить комплект',
 } or {
 	['Ctrl-click'] = 'Ctrl-click to delete set',
 	['Left-click'] = 'Left-click to change your set',
