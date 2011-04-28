@@ -56,10 +56,8 @@ end
 
 local function ModifiedClick(button, name, icon)
 	if(IsShiftKeyDown() and not pendingName) then
-		LDB.OnClick(nil, 'RightButton')
-
-		GearManagerDialog.selectedSetName = name
-		GearManagerDialog_Update()
+		local dialog = StaticPopup_Show('CONFIRM_SAVE_EQUIPMENT_SET', name)
+		dialog.data = name
 	elseif(IsControlKeyDown() and not pendingName) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', name)
 		dialog.data = name
@@ -94,8 +92,17 @@ local function OnClick(self, button)
 			ToggleCharacter('PaperDollFrame')
 		end
 
-		if(not GearManagerDialog:IsVisible()) then
-			GearManagerDialog:Show()
+		if(not CharacterFrame.Expanded) then
+			SetCVar('characterFrameCollapsed', '0')
+			CharacterFrame_Expand()
+		end
+
+		-- '3' is the index of the GearManager tab
+		if(not _G[PAPERDOLL_SIDEBARS[3].frame]:IsShown()) then
+			PaperDollFrame_SetSidebar(nil, 3)
+
+			-- List doesn't generate on a fresh reload or if the CharacterFrame hasn't been shown yet
+			-- I'll have to take a look at this later
 		end
 	end
 end
