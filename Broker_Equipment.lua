@@ -97,12 +97,8 @@ local function OnClick(self, button)
 			CharacterFrame_Expand()
 		end
 
-		-- '3' is the index of the GearManager tab
 		if(not _G[PAPERDOLL_SIDEBARS[3].frame]:IsShown()) then
-			PaperDollFrame_SetSidebar(nil, 3)
-
-			-- List doesn't generate on a fresh reload or if the CharacterFrame hasn't been shown yet
-			-- I'll have to take a look at this later
+			parent:Show() -- XXX: Temporary fix
 		end
 	end
 end
@@ -163,5 +159,11 @@ function parent:PLAYER_REGEN_ENABLED()
 	pendingName, pendingIcon = nil, nil
 end
 
+parent:SetScript('OnUpdate', function(self)
+	PaperDollFrame_SetSidebar(nil, 3)
+	self:Hide()
+end)
+
 parent:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
 parent:RegisterEvent('PLAYER_LOGIN')
+parent:Hide()
