@@ -1,6 +1,6 @@
 ## Interface: 40100
 ## Author: p3lim
-## Version: 40100.15-Beta
+## Version: 40100.16-Beta
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
 
