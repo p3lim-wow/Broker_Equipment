@@ -98,7 +98,7 @@ local function OnClick(self, button)
 		end
 
 		if(not _G[PAPERDOLL_SIDEBARS[3].frame]:IsShown()) then
-			parent:Show() -- XXX: Temporary fix
+			parent:Show()
 		end
 	end
 end
