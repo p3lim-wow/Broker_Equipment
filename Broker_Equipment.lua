@@ -14,7 +14,6 @@ local pendingName
 local pendingIcon
 
 local menu = {}
-local localization = select(2, ...).L
 local parent = CreateFrame('Frame')
 
 local function EquipmentLocated(name)
@@ -76,8 +75,6 @@ end
 
 local function OnTooltipShow(self)
 	self:AddLine('|cff0090ffBroker Equipment|r')
-	self:AddLine('|cff00ff00<' .. localization['Left-click'] .. '>|r')
-	self:AddLine('|cff00ff00<' .. localization['Right-click'] .. '>|r')
 end
 
 local function OnClick(self, button)
@@ -104,7 +101,6 @@ local function OnClick(self, button)
 end
 
 local function CreateMenu()
-	menu = wipe(menu)
 	for index = 1, GetNumEquipmentSets() do
 		local name, icon = GetEquipmentSetInfo(index)
 		menu.func = ModifiedClick
@@ -116,15 +112,6 @@ local function CreateMenu()
 
 		UIDropDownMenu_AddButton(menu)
 	end
-
-	menu = wipe(menu)
-	menu.notCheckable = true
-
-	menu.text = '|cff00ff00<' .. localization['Shift-click'] .. '>|r'
-	UIDropDownMenu_AddButton(menu)
-
-	menu.text = '|cff00ff00<' .. localization['Ctrl-click'] .. '>|r'
-	UIDropDownMenu_AddButton(menu)
 end
 
 function parent:PLAYER_LOGIN()
