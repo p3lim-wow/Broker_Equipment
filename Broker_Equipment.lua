@@ -27,11 +27,11 @@ local function UpdateDisplay()
 				LDB.text = name
 				LDB.icon = icon
 				return
-			else
-				LDB.text = UNKNOWN
-				LDB.icon = [=[Interface\Icons\INV_Misc_QuestionMark]=]
 			end
 		end
+
+		LDB.text = UNKNOWN
+		LDB.icon = [=[Interface\Icons\INV_Misc_QuestionMark]=]
 	end
 end
 
