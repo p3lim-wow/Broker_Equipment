@@ -79,6 +79,11 @@ local function CreateDropdown()
 		info.arg1 = name
 		info.checked = equipped
 
+		info.tooltipTitle = 'Broker_Equipment_Hack'
+		info.tooltipText = name
+		info.tooltipWhileDisabled = true
+		info.tooltipOnButton = true
+
 		if(pending == name) then
 			info.text = string.format('|cffffff00%s|r', name)
 		elseif(missing > 0) then
@@ -124,4 +129,10 @@ end
 Broker_Equipment:SetScript('OnUpdate', function(self)
 	PaperDollFrame_SetSidebar(nil, 3)
 	self:Hide()
+end)
+
+GameTooltip:HookScript('OnShow', function(self)
+	if(GameTooltipTextLeft1:GetText() == 'Broker_Equipment_Hack') then
+		GameTooltip:SetEquipmentSet(GameTooltipTextLeft2:GetText())
+	end
 end)
