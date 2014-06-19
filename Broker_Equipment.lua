@@ -1,15 +1,4 @@
-﻿--[[
-
-	Copyright (c) 2009 - 2012 Adrian L Lange <adrianlund@gmail.com>
-	All rights reserved.
-
-	You're allowed to use this addon, free of monetary charge,
-	but you are not allowed to modify, alter, or redistribute
-	this addon without express, written permission of the author.
-
---]]
-
-local Broker_Equipment = CreateFrame('Frame')
+﻿local Broker_Equipment = CreateFrame('Frame')
 Broker_Equipment:RegisterEvent('PLAYER_LOGIN')
 Broker_Equipment:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
 Broker_Equipment:Hide()
