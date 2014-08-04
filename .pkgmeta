@@ -1,0 +1,18 @@
+package-as: Broker_Equipment
+
+externals:
+    embeds/LibStub:
+        url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+    embeds/CallbackHandler:
+        url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
+    embeds/LibDataBroker:
+        url: git://github.com/tekkub/libdatabroker-1-1.git
+
+manual-changelog:
+    filename: CHANGELOG.txt
+    markup-type: bbcode
+
+ignore:
+    - embeds/LibStub/tests
+    - embeds/LibStub/.pkgmeta
+    - embeds/LibDataBroker/README.textile
