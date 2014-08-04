@@ -4,8 +4,8 @@
 ## Title: Broker Equipment
 ## Notes: LDB Equipment Manager plug-in
 
-libs\LibStub.lua
-libs\CallbackHandler-1.0.lua
-libs\LibDataBroker-1.1.lua
+embeds\LibStub\LibStub.lua
+embeds\CallbackHandler\CallbackHandler-1.0.lua
+embeds\LibDataBroker\LibDataBroker-1.1.lua
 
 Broker_Equipment.lua
