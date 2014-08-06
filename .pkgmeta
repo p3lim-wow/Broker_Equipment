@@ -8,10 +8,6 @@ externals:
     embeds/LibDataBroker:
         url: git://github.com/tekkub/libdatabroker-1-1.git
 
-manual-changelog:
-    filename: CHANGELOG.txt
-    markup-type: bbcode
-
 ignore:
     - embeds/LibStub/tests
     - embeds/LibStub/.pkgmeta
