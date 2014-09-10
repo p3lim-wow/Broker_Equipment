@@ -153,8 +153,7 @@ function LDB:OnClick(button)
 
 	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
 		if(not Menu) then
-			Menu = CreateFrame('Frame', nil, self)
-			Menu:SetPoint('TOP', self, 'BOTTOM')
+			Menu = CreateFrame('Frame', nil, UIParent)
 			Menu:SetBackdrop(BACKDROP)
 			Menu:SetBackdropColor(0, 0, 0)
 			Menu:SetScript('OnEnter', OnEnter)
@@ -174,6 +173,8 @@ function LDB:OnClick(button)
 			Menu:Hide()
 		else
 			UpdateMenu(self)
+			Menu:ClearAllPoints()
+			Menu:SetPoint('TOP', self, 'BOTTOM')
 			Menu:Show()
 		end
 
