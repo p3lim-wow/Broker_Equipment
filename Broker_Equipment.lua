@@ -9,7 +9,11 @@ local BACKDROP = {
 	insets = {top = 3, bottom = 3, left = 3, right = 3}
 }
 
-local LDB, Menu, pending
+local LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
+	type = 'data source',
+})
+
+local Menu, pending
 
 local function UpdateDisplay()
 	if(InCombatLockdown() and pending) then
@@ -137,12 +141,12 @@ local function UpdateMenu(parent)
 	Menu:SetSize(maxWidth + 25, (numEquipmentSets * 18) + (UIDROPDOWNMENU_BORDER_HEIGHT * 2))
 end
 
-local function OnTooltipShow(self)
+function LDB:OnTooltipShow()
 	self:SetEquipmentSet(LDB.text)
 end
 
 local hooked = {}
-local function OnClick(self, button)
+function LDB:OnClick(button)
 	if(GameTooltip:GetOwner() == self) then
 		GameTooltip:Hide()
 	end
@@ -198,12 +202,6 @@ local function OnClick(self, button)
 end
 
 function Broker_Equipment:PLAYER_LOGIN()
-	LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
-		type = 'data source',
-		OnTooltipShow = OnTooltipShow,
-		OnClick = OnClick,
-	})
-
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self.EQUIPMENT_SETS_CHANGED = UpdateDisplay
