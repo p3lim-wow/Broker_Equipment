@@ -1,3 +1,10 @@
+## Changes in 50400.24-Release:
+
+- Added: Changelog file
+- Changed: Create the broker object on load
+- Fixed: Dropdown going off the screen
+- Fixed: Dropdown not respecting the parent frame
+
 ## Changes in 50400.23-Release:
 
 - Added: Proper license
