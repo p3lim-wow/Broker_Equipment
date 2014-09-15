@@ -174,7 +174,22 @@ function LDB:OnClick(button)
 		else
 			UpdateMenu(self)
 			Menu:ClearAllPoints()
-			Menu:SetPoint('TOP', self, 'BOTTOM')
+			Menu:SetPoint('TOP', self, 'BOTTOM') -- temporary anchor
+
+			local sideAnchor = ''
+			if(Menu:GetRight() > GetScreenWidth()) then
+				sideAnchor = 'RIGHT'
+			elseif(Menu:GetLeft() <= 0) then
+				sideAnchor = 'LEFT'
+			end
+
+			Menu:ClearAllPoints()
+			if(Menu:GetBottom() <= 0) then
+				Menu:SetPoint('BOTTOM' .. sideAnchor, self, 'TOP' .. sideAnchor)
+			else
+				Menu:SetPoint('TOP' .. sideAnchor, self, 'BOTTOM' .. sideAnchor)
+			end
+
 			Menu:Show()
 		end
 
