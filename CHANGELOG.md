@@ -1,3 +1,8 @@
+## Changes in 60000.25-Release:
+
+- Changed: Update Interface version
+- Fixed: Dropdown sometimes rendering behind other objects
+
 ## Changes in 50400.24-Release:
 
 - Added: Changelog file
