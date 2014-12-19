@@ -64,8 +64,10 @@ local function OnLeave()
 end
 
 local function OnItemEnter(self)
-	GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
-	GameTooltip:SetEquipmentSet(self.name)
+	if(Broker_EquipmentDB.showTooltipMenu) then
+		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+		GameTooltip:SetEquipmentSet(self.name)
+	end
 
 	OnEnter()
 end
@@ -142,7 +144,9 @@ local function UpdateMenu(parent)
 end
 
 function LDB:OnTooltipShow()
-	self:SetEquipmentSet(LDB.text)
+	if(Broker_EquipmentDB.showTooltipDisplay) then
+		self:SetEquipmentSet(LDB.text)
+	end
 end
 
 local hooked = {}
