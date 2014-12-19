@@ -1,3 +1,8 @@
+## Changes in 60000.26-Release:
+
+- Added: Options to disable tooltips
+- Added: Localization
+
 ## Changes in 60000.25-Release:
 
 - Changed: Update Interface version
