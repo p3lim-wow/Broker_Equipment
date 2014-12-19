@@ -1,4 +1,4 @@
-local addonName = ...
+local addonName, L = ...
 
 local objects = {}
 local temporary = {}
@@ -77,16 +77,16 @@ Panel:SetScript('OnShow', function(self)
 	Description:SetPoint('TOPLEFT', Title, 'BOTTOMLEFT', 0, -8)
 	Description:SetPoint('RIGHT', -32, 0)
 	Description:SetJustifyH('LEFT')
-	Description:SetText('Equipment sets!')
+	Description:SetText(L['Equipment sets!'])
 	self.Description = Description
 
 	local DisplayTooltip = CreateCheckButton(self, 'showTooltipDisplay')
 	DisplayTooltip:SetPoint('TOPLEFT', Description, 'BOTTOMLEFT', -2, -10)
-	DisplayTooltip.Text:SetText('Enable tooltips in display')
+	DisplayTooltip.Text:SetText(L['Enable tooltips in display'])
 
 	local MenuTooltip = CreateCheckButton(self, 'showTooltipMenu')
 	MenuTooltip:SetPoint('TOPLEFT', DisplayTooltip, 'BOTTOMLEFT', 0, -8)
-	MenuTooltip.Text:SetText('Enable tooltips in menu')
+	MenuTooltip.Text:SetText(L['Enable tooltips in menu'])
 
 	Panel:refresh()
 
