@@ -4,7 +4,7 @@ externals:
     embeds/LibStub:
         url: svn://svn.wowace.com/wow/libstub/mainline/trunk
     embeds/CallbackHandler:
-        url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
+        url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk
     embeds/LibDataBroker:
         url: git://github.com/tekkub/libdatabroker-1-1.git
 
@@ -15,4 +15,6 @@ manual-changelog:
 ignore:
     - embeds/LibStub/tests
     - embeds/LibStub/.pkgmeta
+    - embeds/CallbackHandler/LibStub
+    - embeds/CallbackHandler/.pkgmeta
     - embeds/LibDataBroker/README.textile

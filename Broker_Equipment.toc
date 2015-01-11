@@ -8,7 +8,7 @@
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibDataBroker-1.1
 
 embeds\LibStub\LibStub.lua
-embeds\CallbackHandler\CallbackHandler-1.0.lua
+embeds\CallbackHandler\CallbackHandler-1.0\CallbackHandler-1.0.lua
 embeds\LibDataBroker\LibDataBroker-1.1.lua
 
 Localization.lua
