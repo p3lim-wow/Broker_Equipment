@@ -13,6 +13,7 @@ manual-changelog:
     markup-type: markdown
 
 ignore:
+    - CONTRIBUTING.md
     - embeds/LibStub/tests
     - embeds/LibStub/.pkgmeta
     - embeds/CallbackHandler/LibStub
