@@ -1,13 +1,16 @@
 ﻿local addonName, L = ...
 
-local QUESTION_MARK_ICON = [[Interface\Icons\INV_MISC_QUESTIONMARK]]
+local PTR = select(4, GetBuildInfo()) == 70200
+
+local QUESTION_MARK_ICON = QUESTION_MARK_ICON or [[Interface\Icons\INV_MISC_QUESTIONMARK]] -- DEPRECATED
 local BACKDROP = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
 	edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], edgeSize = 16,
 	insets = {top = 3, bottom = 3, left = 3, right = 3}
 }
 
-local items, pending = {}
+local pending -- DEPRECATED
+local items, pendingID = {}
 local LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
 })
@@ -46,11 +49,11 @@ function LDB:OnClick(button)
 		GameTooltip:Hide()
 	end
 
-	if(button ~= 'RightButton' and GetNumEquipmentSets() > 0) then
+	if(button ~= 'RightButton' and (PTR and C_EquipmentSet.GetNumEquipmentSets or GetNumEquipmentSets)() > 0) then
 		if(Broker_Equipment:IsShown()) then
 			Broker_Equipment:Hide()
 		else
-			Broker_Equipment:Update()
+			Broker_Equipment:Update(self)
 			Broker_Equipment:ClearAllPoints()
 			Broker_Equipment:SetPoint('TOP', self, 'BOTTOM') -- temporary anchor
 
@@ -96,20 +99,29 @@ function LDB:OnClick(button)
 end
 
 local function OnItemClick(self)
-	if(IsShiftKeyDown() and not pending) then
+	if(IsShiftKeyDown() and not (PTR and pendingID or pending)) then
 		local dialog = StaticPopup_Show('CONFIRM_SAVE_EQUIPMENT_SET', self.name)
-		dialog.data = self.name
-	elseif(IsControlKeyDown() and not pending) then
+		dialog.data = PTR and self.id or self.name
+	elseif(IsControlKeyDown() and not (PTR and pendingID or pending)) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', self.name)
-		dialog.data = self.name
+		dialog.data = PTR and self.id or self.name
 	else
 		if(InCombatLockdown()) then
 			Broker_Equipment:RegisterEvent('PLAYER_REGEN_ENABLED')
-			pending = self.name
+
+			if(PTR) then
+				pendingID = self.id
+			else
+				pending = self.name
+			end
 
 			Broker_Equipment:UpdateDisplay()
 		else
-			EquipmentManager_EquipSet(pending or self.name)
+			if(PTR) then
+				EquipmentManager_EquipSet(pendingID or self.id)
+			else
+				EquipmentManager_EquipSet(pending or self.name)
+			end
 		end
 	end
 
@@ -172,32 +184,61 @@ end
 
 function Broker_Equipment:Update()
 	local maxWidth = 0
+	local numSets = 0
 
-	local numEquipmentSets = GetNumEquipmentSets()
-	for index = 1, numEquipmentSets do
-		local Item = items[index] or self:CreateItem(index)
+	if(PTR) then
+		for index, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
+			local Item = items[index] or self:CreateItem(index)
 
-		local name, icon, _, equipped, _, _, _, missing = GetEquipmentSetInfo(index)
-		Item.Button:SetChecked(equipped)
-		Item.Icon:SetTexture(icon or [[Interface\Icons\INV_MISC_QUESTIONMARK]])
-		Item.name = name
-		Item:Show()
+			local name, texture, _, isEquipped, _, _, _, numLost = C_EquipmentSet.GetEquipmentSetInfo(setID)
+			Item.Button:SetChecked(isEquipped)
+			Item.Icon:SetTexture(texture)
+			Item.name = name
+			Item.id = setID
+			Item:Show()
 
-		if(pending == name) then
-			Item:SetFormattedText('|cffffff00%s|r', name)
-		elseif(missing > 0) then
-			Item:SetFormattedText('|cffff0000%s|r', name)
-		else
-			Item:SetText(name)
+			if(pendingID == setID) then
+				Item:SetFormattedText('|cffffff00%s|r', name)
+			elseif(numLost > 0) then
+				Item:SetFormattedText('|cffff0000%s|r', name)
+			else
+				Item:SetText(name)
+			end
+
+			local width = Item.Label:GetWidth() + 50
+			if(width > maxWidth) then
+				maxWidth = width
+			end
+
+			numSets = numSets + 1
 		end
+	else -- DEPRECATED
+		numSets = GetNumEquipmentSets()
+		for index = 1, numSets do
+			local Item = items[index] or self:CreateItem(index)
 
-		local width = Item.Label:GetWidth() + 50
-		if(width > maxWidth) then
-			maxWidth = width
+			local name, icon, _, equipped, _, _, _, missing = GetEquipmentSetInfo(index)
+			Item.Button:SetChecked(equipped)
+			Item.Icon:SetTexture(icon or QUESTION_MARK_ICON)
+			Item.name = name
+			Item:Show()
+
+			if(pending == name) then
+				Item:SetFormattedText('|cffffff00%s|r', name)
+			elseif(missing > 0) then
+				Item:SetFormattedText('|cffff0000%s|r', name)
+			else
+				Item:SetText(name)
+			end
+
+			local width = Item.Label:GetWidth() + 50
+			if(width > maxWidth) then
+				maxWidth = width
+			end
 		end
 	end
 
-	for index = numEquipmentSets + 1, #items do
+	for index = numSets + 1, #items do
 		items[index]:Hide()
 	end
 
@@ -205,25 +246,46 @@ function Broker_Equipment:Update()
 		Item:SetSize(maxWidth, 18)
 	end
 
-	self:SetSize(maxWidth + 25, (numEquipmentSets * 18) + (UIDROPDOWNMENU_BORDER_HEIGHT * 2))
+	self:SetSize(maxWidth + 25, (numSets * 18) + (UIDROPDOWNMENU_BORDER_HEIGHT * 2))
 end
 
 function Broker_Equipment:UpdateDisplay()
-	if(InCombatLockdown() and pending) then
-		LDB.text = '|cffffff00' .. pending
-		LDB.icon = [[Interface\Icons\]] .. GetEquipmentSetInfoByName(pending)
-	else
-		for index = 1, GetNumEquipmentSets() do
-			local name, icon, _, equipped = GetEquipmentSetInfo(index)
-			if(equipped) then
-				LDB.text = name
-				LDB.icon = icon or QUESTION_MARK_ICON
-				return
+	if(PTR) then
+		if(InCombatLockdown() and pendingID) then
+			local name, texture = C_EquipmentSet.GetEquipmentSetInfo(pendingID)
+			LDB.text = '|cffffff00' .. name
+			LDB.icon = texture
+		else
+			for _, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
+				local name, texture, _, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
+				if(isEquipped) then
+					LDB.text = name
+					LDB.icon = texture
+					return
+				end
 			end
-		end
 
-		LDB.text = UNKNOWN
-		LDB.icon = QUESTION_MARK_ICON
+			-- fallback name and texture
+			LDB.text = UNKNOWN
+			LDB.icon = QUESTION_MARK_ICON
+		end
+	else
+		if(InCombatLockdown() and pending) then
+			LDB.text = '|cffffff00' .. pending
+			LDB.icon = [[Interface\Icons\]] .. GetEquipmentSetInfoByName(pending)
+		else
+			for index = 1, GetNumEquipmentSets() do
+				local name, icon, _, equipped = GetEquipmentSetInfo(index)
+				if(equipped) then
+					LDB.text = name
+					LDB.icon = icon or QUESTION_MARK_ICON
+					return
+				end
+			end
+
+			LDB.text = UNKNOWN
+			LDB.icon = QUESTION_MARK_ICON
+		end
 	end
 end
 
@@ -231,7 +293,6 @@ function Broker_Equipment:PLAYER_LOGIN()
 	self:RegisterEvent('UNIT_INVENTORY_CHANGED')
 	self:RegisterEvent('EQUIPMENT_SETS_CHANGED')
 	self.EQUIPMENT_SETS_CHANGED = self.UpdateDisplay
-
 
 	self:SetBackdrop(BACKDROP)
 	self:SetBackdropColor(0, 0, 0)
@@ -251,5 +312,6 @@ function Broker_Equipment:PLAYER_REGEN_ENABLED()
 	self:UnregisterEvent('PLAYER_REGEN_ENABLED')
 
 	OnItemClick()
-	pending = nil
+	pending = nil -- DEPRECATED
+	pendingID = nil
 end
