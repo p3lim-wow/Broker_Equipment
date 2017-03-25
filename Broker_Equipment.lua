@@ -1,4 +1,6 @@
-﻿local Broker_Equipment = CreateFrame('Frame')
+﻿local _, L = ...
+
+local Broker_Equipment = CreateFrame('Frame')
 Broker_Equipment:RegisterEvent('PLAYER_LOGIN')
 Broker_Equipment:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
 Broker_Equipment:Hide()
@@ -67,6 +69,12 @@ local function OnItemEnter(self)
 	if(Broker_EquipmentDB.showTooltipMenu) then
 		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 		GameTooltip:SetEquipmentSet(self.name)
+
+		GameTooltip:AddLine(' ')
+		GameTooltip:AddLine(L['|cff33ff33Click|r to equip set.'])
+		GameTooltip:AddLine(L['|cff33ff33Shift-Click|r to update set with current equipment.'])
+		GameTooltip:AddLine(L['|cff33ff33Ctrl-Click|r to |cffff3333delete|r set.'])
+		GameTooltip:Show()
 	end
 
 	OnEnter()
@@ -146,6 +154,9 @@ end
 function LDB:OnTooltipShow()
 	if(Broker_EquipmentDB.showTooltipDisplay) then
 		self:SetEquipmentSet(LDB.text)
+		self:AddLine(' ')
+		self:AddLine(L['|cff33ff33Left-Click|r to open equipment menu.'])
+		self:AddLine(L['|cff33ff33Right-Click|r to open character window.'])
 	end
 end
 
