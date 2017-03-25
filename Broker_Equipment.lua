@@ -26,13 +26,13 @@ local function UpdateDisplay()
 			local name, icon, _, equipped = GetEquipmentSetInfo(index)
 			if(equipped) then
 				LDB.text = name
-				LDB.icon = icon
+				LDB.icon = icon or [[Interface\Icons\INV_MISC_QUESTIONMARK]]
 				return
 			end
 		end
 
 		LDB.text = UNKNOWN
-		LDB.icon = [[Interface\Icons\INV_Misc_QuestionMark]]
+		LDB.icon = [[Interface\Icons\INV_MISC_QUESTIONMARK]]
 	end
 end
 
@@ -123,7 +123,7 @@ local function UpdateMenu(parent)
 
 		local name, icon, _, equipped, _, _, _, missing = GetEquipmentSetInfo(index)
 		Item.Button:SetChecked(equipped)
-		Item.Icon:SetTexture(icon)
+		Item.Icon:SetTexture(icon or [[Interface\Icons\INV_MISC_QUESTIONMARK]])
 		Item.name = name
 
 		if(pending == name) then
