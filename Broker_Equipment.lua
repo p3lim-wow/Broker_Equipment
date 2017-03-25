@@ -3,7 +3,6 @@
 local Broker_Equipment = CreateFrame('Frame')
 Broker_Equipment:RegisterEvent('PLAYER_LOGIN')
 Broker_Equipment:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
-Broker_Equipment:Hide()
 
 local BACKDROP = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
@@ -228,7 +227,7 @@ function LDB:OnClick(button)
 		end
 
 		if(not _G[PAPERDOLL_SIDEBARS[3].frame]:IsShown()) then
-			Broker_Equipment:Show()
+			PaperDollFrame_SetSidebar(nil, 3)
 		end
 	end
 end
@@ -253,8 +252,3 @@ function Broker_Equipment:PLAYER_REGEN_ENABLED()
 	OnItemClick()
 	pending = nil
 end
-
-Broker_Equipment:SetScript('OnUpdate', function(self)
-	PaperDollFrame_SetSidebar(nil, 3)
-	self:Hide()
-end)
