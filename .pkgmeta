@@ -1,28 +1,21 @@
 package-as: Broker_Equipment
 
 externals:
-    embeds/LibStub:
-        url: svn://svn.wowace.com/wow/libstub/mainline/trunk
-    embeds/CallbackHandler:
-        url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk
-    embeds/LibDataBroker:
-        url: git://github.com/tekkub/libdatabroker-1-1.git
+  embeds/LibStub:
+    url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+  embeds/CallbackHandler:
+    url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk
+  embeds/LibDataBroker:
+    url: git://github.com/tekkub/libdatabroker-1-1.git
 
 optional-dependencies:
-    - libstub
-    - callbackhandler
-    - libdatabroker-1-1
+  - libstub
+  - callbackhandler
+  - libdatabroker-1-1
 
 manual-changelog:
-    filename: CHANGELOG.md
-    markup-type: markdown
+  filename: CHANGELOG.md
+  markup-type: markdown
 
 ignore:
-    - .gitmodules
-    - README.md
-    - CONTRIBUTING.md
-    - embeds/LibStub/tests
-    - embeds/LibStub/.pkgmeta
-    - embeds/CallbackHandler/LibStub
-    - embeds/CallbackHandler/.pkgmeta
-    - embeds/LibDataBroker/README.textile
+  - README.md
