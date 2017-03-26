@@ -1,3 +1,12 @@
+## Changes in 70100.27-Release:
+
+- Added: Help lines to the tooltips
+- Added: Support for the new C_EquipmentSet API in 7.2
+- Added: Global name to the menu for skinning purposes
+- Changed: Update Interface version
+- Fixed: The "unknown" icon not showing up
+- Removed: Temporary hacks for showing the equipment sidebar in the Character window
+
 ## Changes in 60000.26-Release:
 
 - Added: Options to disable tooltips
