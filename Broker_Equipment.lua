@@ -1,15 +1,11 @@
 ﻿local addonName, L = ...
 
-local PTR = select(4, GetBuildInfo()) == 70200
-
-local QUESTION_MARK_ICON = QUESTION_MARK_ICON or [[Interface\Icons\INV_MISC_QUESTIONMARK]] -- DEPRECATED
 local BACKDROP = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
 	edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], edgeSize = 16,
 	insets = {top = 3, bottom = 3, left = 3, right = 3}
 }
 
-local pending -- DEPRECATED
 local items, pendingID = {}
 local LDB = LibStub('LibDataBroker-1.1'):NewDataObject('Broker_Equipment', {
 	type = 'data source',
@@ -49,7 +45,7 @@ function LDB:OnClick(button)
 		GameTooltip:Hide()
 	end
 
-	if(button ~= 'RightButton' and (PTR and C_EquipmentSet.GetNumEquipmentSets or GetNumEquipmentSets)() > 0) then
+	if(button ~= 'RightButton' and C_EquipmentSet.GetNumEquipmentSets() > 0) then
 		if(Broker_Equipment:IsShown()) then
 			Broker_Equipment:Hide()
 		else
@@ -99,29 +95,20 @@ function LDB:OnClick(button)
 end
 
 local function OnItemClick(self)
-	if(IsShiftKeyDown() and not (PTR and pendingID or pending)) then
+	if(IsShiftKeyDown() and not pendingID) then
 		local dialog = StaticPopup_Show('CONFIRM_SAVE_EQUIPMENT_SET', self.name)
-		dialog.data = PTR and self.id or self.name
-	elseif(IsControlKeyDown() and not (PTR and pendingID or pending)) then
+		dialog.data = self.id
+	elseif(IsControlKeyDown() and not pendingID) then
 		local dialog = StaticPopup_Show('CONFIRM_DELETE_EQUIPMENT_SET', self.name)
-		dialog.data = PTR and self.id or self.name
+		dialog.data = self.id
 	else
 		if(InCombatLockdown()) then
+			pendingID = self.id
+
 			Broker_Equipment:RegisterEvent('PLAYER_REGEN_ENABLED')
-
-			if(PTR) then
-				pendingID = self.id
-			else
-				pending = self.name
-			end
-
 			Broker_Equipment:UpdateDisplay()
 		else
-			if(PTR) then
-				EquipmentManager_EquipSet(pendingID or self.id)
-			else
-				EquipmentManager_EquipSet(pending or self.name)
-			end
+			EquipmentManager_EquipSet(pendingID or self.id)
 		end
 	end
 
@@ -186,56 +173,30 @@ function Broker_Equipment:Update()
 	local maxWidth = 0
 	local numSets = 0
 
-	if(PTR) then
-		for index, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
-			local Item = items[index] or self:CreateItem(index)
+	for index, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
+		local Item = items[index] or self:CreateItem(index)
 
-			local name, texture, _, isEquipped, _, _, _, numLost = C_EquipmentSet.GetEquipmentSetInfo(setID)
-			Item.Button:SetChecked(isEquipped)
-			Item.Icon:SetTexture(texture)
-			Item.name = name
-			Item.id = setID
-			Item:Show()
+		local name, texture, _, isEquipped, _, _, _, numLost = C_EquipmentSet.GetEquipmentSetInfo(setID)
+		Item.Button:SetChecked(isEquipped)
+		Item.Icon:SetTexture(texture)
+		Item.name = name
+		Item.id = setID
+		Item:Show()
 
-			if(pendingID == setID) then
-				Item:SetFormattedText('|cffffff00%s|r', name)
-			elseif(numLost > 0) then
-				Item:SetFormattedText('|cffff0000%s|r', name)
-			else
-				Item:SetText(name)
-			end
-
-			local width = Item.Label:GetWidth() + 50
-			if(width > maxWidth) then
-				maxWidth = width
-			end
-
-			numSets = numSets + 1
+		if(pendingID == setID) then
+			Item:SetFormattedText('|cffffff00%s|r', name)
+		elseif(numLost > 0) then
+			Item:SetFormattedText('|cffff0000%s|r', name)
+		else
+			Item:SetText(name)
 		end
-	else -- DEPRECATED
-		numSets = GetNumEquipmentSets()
-		for index = 1, numSets do
-			local Item = items[index] or self:CreateItem(index)
 
-			local name, icon, _, equipped, _, _, _, missing = GetEquipmentSetInfo(index)
-			Item.Button:SetChecked(equipped)
-			Item.Icon:SetTexture(icon or QUESTION_MARK_ICON)
-			Item.name = name
-			Item:Show()
-
-			if(pending == name) then
-				Item:SetFormattedText('|cffffff00%s|r', name)
-			elseif(missing > 0) then
-				Item:SetFormattedText('|cffff0000%s|r', name)
-			else
-				Item:SetText(name)
-			end
-
-			local width = Item.Label:GetWidth() + 50
-			if(width > maxWidth) then
-				maxWidth = width
-			end
+		local width = Item.Label:GetWidth() + 50
+		if(width > maxWidth) then
+			maxWidth = width
 		end
+
+		numSets = numSets + 1
 	end
 
 	for index = numSets + 1, #items do
@@ -250,42 +211,23 @@ function Broker_Equipment:Update()
 end
 
 function Broker_Equipment:UpdateDisplay()
-	if(PTR) then
-		if(InCombatLockdown() and pendingID) then
-			local name, texture = C_EquipmentSet.GetEquipmentSetInfo(pendingID)
-			LDB.text = '|cffffff00' .. name
-			LDB.icon = texture
-		else
-			for _, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
-				local name, texture, _, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
-				if(isEquipped) then
-					LDB.text = name
-					LDB.icon = texture
-					return
-				end
-			end
-
-			-- fallback name and texture
-			LDB.text = UNKNOWN
-			LDB.icon = QUESTION_MARK_ICON
-		end
+	if(InCombatLockdown() and pendingID) then
+		local name, texture = C_EquipmentSet.GetEquipmentSetInfo(pendingID)
+		LDB.text = '|cffffff00' .. name
+		LDB.icon = texture
 	else
-		if(InCombatLockdown() and pending) then
-			LDB.text = '|cffffff00' .. pending
-			LDB.icon = [[Interface\Icons\]] .. GetEquipmentSetInfoByName(pending)
-		else
-			for index = 1, GetNumEquipmentSets() do
-				local name, icon, _, equipped = GetEquipmentSetInfo(index)
-				if(equipped) then
-					LDB.text = name
-					LDB.icon = icon or QUESTION_MARK_ICON
-					return
-				end
+		for _, setID in next, C_EquipmentSet.GetEquipmentSetIDs() do
+			local name, texture, _, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
+			if(isEquipped) then
+				LDB.text = name
+				LDB.icon = texture
+				return
 			end
-
-			LDB.text = UNKNOWN
-			LDB.icon = QUESTION_MARK_ICON
 		end
+
+		-- fallback name and texture
+		LDB.text = UNKNOWN
+		LDB.icon = QUESTION_MARK_ICON
 	end
 end
 
@@ -312,6 +254,5 @@ function Broker_Equipment:PLAYER_REGEN_ENABLED()
 	self:UnregisterEvent('PLAYER_REGEN_ENABLED')
 
 	OnItemClick()
-	pending = nil -- DEPRECATED
 	pendingID = nil
 end
