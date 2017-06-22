@@ -1,3 +1,8 @@
+### Changes in 70200.28-Release:
+
+- Changed: Update Interface version
+- Removed: 7.1 compatibility
+
 ### Changes in 70100.27-Release:
 
 - Added: Help lines to the tooltips
