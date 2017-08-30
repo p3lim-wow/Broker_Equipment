@@ -1,3 +1,8 @@
+### Changes in 70300.29-Release:
+
+- Changed: Update Interface version
+- Fixed: Changes to the sound system
+
 ### Changes in 70200.28-Release:
 
 - Changed: Update Interface version
