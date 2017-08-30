@@ -70,7 +70,7 @@ function LDB:OnClick(button)
 			Broker_Equipment:Show()
 		end
 
-		PlaySound('igMainMenuOptionCheckBoxOn')
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 
 		if(not hooked[self]) then
 			self:HookScript('OnEnter', FadePause)
