@@ -1,21 +1,11 @@
 package-as: Broker_Equipment
 
-enable-nolib-creation: no
-
 externals:
   libs/LibStub:
-    url: svn://svn.wowace.com/wow/libstub/mainline/tags/1.0
-  libs/CallbackHandler-1.0:
-    url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
-  libs/LibDataBroker-1.1:
-    url: https://repos.wowace.com/wow/libdatabroker-1-1/mainline.git
-
-optional-dependencies:
-  - libstub
-  - callbackhandler
-
-tools-used:
-  - libdatabroker-1-1
+    url: https://repos.wowace.com/wow/libstub/trunk
+    tag: 1.0
+  libs/CallbackHandler-1.0: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
+  libs/LibDataBroker-1.1: https://repos.wowace.com/wow/libdatabroker-1-1
 
 manual-changelog:
   filename: CHANGELOG.md
@@ -23,3 +13,4 @@ manual-changelog:
 
 ignore:
   - README.md
+  - utils
