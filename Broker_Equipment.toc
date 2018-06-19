@@ -7,6 +7,9 @@
 
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibDataBroker-1.1
 
+## X-Curse-Project-ID: 20336
+## X-WoWI-ID: 12641
+
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
